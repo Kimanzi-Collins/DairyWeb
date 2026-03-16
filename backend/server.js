@@ -5,44 +5,64 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware
-app.use(cors());          // Allows React to call this API
-app.use(express.json());  // Parses JSON from forms
+app.use(cors());
+app.use(express.json());
 
-// ---------- API ROUTES ----------
+let pool;  // Will hold our database connection
 
-// GET all items (for reports/display)
+// Health check — hit this in your browser first
+app.get('/', (req, res) => {
+    res.json({ 
+        status: 'Server is running',
+        dbConnected: pool ? true : false
+    });
+});
+
+// GET all items
 app.get('/api/items', async (req, res) => {
     try {
-        const pool = await getConnection();
         const result = await pool.request().query('SELECT * FROM TestItems');
+        console.log('📋 Fetched items:', result.recordset.length);
         res.json(result.recordset);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Database query failed' });
+        console.error('❌ GET failed:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 
-// POST a new item (from a form)
+// POST new item
 app.post('/api/items', async (req, res) => {
     try {
         const { name } = req.body;
-        const pool = await getConnection();
+        console.log('📝 Inserting:', name);
 
-        // Parameterized query — prevents SQL injection!
         await pool.request()
             .input('name', sql.NVarChar, name)
             .query('INSERT INTO TestItems (Name) VALUES (@name)');
 
+        console.log('✅ Insert successful');
         res.status(201).json({ message: 'Item added!' });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Insert failed' });
+        console.error('❌ POST failed:', err.message);
+        res.status(500).json({ error: err.message });
     }
 });
 
-// ---------- START SERVER ----------
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// START EVERYTHING
+async function startServer() {
+    console.log('🚀 Starting server...\n');
+
+    // Step 1: Connect to DB FIRST
+    pool = await getConnection();
+
+    // Step 2: Only start Express AFTER DB is confirmed working
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+        console.log('\n========== ALL SYSTEMS GO ==========');
+        console.log(`🌐 Server:  http://localhost:${PORT}`);
+        console.log(`📡 Test:    http://localhost:${PORT}/api/items`);
+        console.log('=====================================');
+    });
+}
+
+startServer();

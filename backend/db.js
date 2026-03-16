@@ -8,17 +8,28 @@ const config = {
     database: process.env.DB_DATABASE,
     port: parseInt(process.env.DB_PORT),
     options: {
-        trustServerCertificate: true,  // Required for local dev
-        encrypt: false                  // Fine for localhost
-    }
+        trustServerCertificate: true,
+        encrypt: false
+    },
+    connectionTimeout: 10000,
+    requestTimeout: 10000
 };
 
 let pool;
 
 async function getConnection() {
     if (!pool) {
-        pool = await sql.connect(config);
-        console.log('✅ Connected to SQL Server!');
+        try {
+            console.log('⏳ Connecting to SQL Server...');
+            pool = await sql.connect(config);
+            console.log('✅ Connected to SQL Server!');
+
+            const result = await pool.request().query('SELECT 1 AS TestResult');
+            console.log('✅ Test query passed');
+        } catch (err) {
+            console.error('❌ Connection failed:', err.message);
+            process.exit(1);
+        }
     }
     return pool;
 }
