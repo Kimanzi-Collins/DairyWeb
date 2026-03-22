@@ -14,7 +14,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ---- CRUD ROUTES ----
 const farmersRoute = require('./routes/farmers');
 // We'll add the rest one by one
-// const agentsRoute = require('./routes/agents');
+const agentsRoute = require('./routes/agents');
 // const factoriesRoute = require('./routes/factories');
 // const inputsRoute = require('./routes/inputs');
 // const milkQualityRoute = require('./routes/milkQuality');
@@ -33,7 +33,7 @@ const farmersRoute = require('./routes/farmers');
 
 // ---- REGISTER ROUTES ----
 app.use('/api/farmers', farmersRoute);
-// app.use('/api/agents', agentsRoute);
+app.use('/api/agents', agentsRoute);
 // app.use('/api/factories', factoriesRoute);
 // app.use('/api/inputs', inputsRoute);
 // app.use('/api/milk-quality', milkQualityRoute);
@@ -64,6 +64,7 @@ async function startServer() {
         console.log('\n========== ALL SYSTEMS GO ==========');
         console.log(`🐄 API:     http://localhost:${PORT}`);
         console.log(`📡 Farmers: http://localhost:${PORT}/api/farmers`);
+        console.log(`📡 Agents:  http://localhost:${PORT}/api/agents`);
         console.log('=====================================');
     });
 }
