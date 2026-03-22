@@ -11,8 +11,13 @@ const config = {
         trustServerCertificate: true,
         encrypt: false
     },
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000
+    },
     connectionTimeout: 10000,
-    requestTimeout: 10000
+    requestTimeout: 30000
 };
 
 let pool;
@@ -23,9 +28,6 @@ async function getConnection() {
             console.log('⏳ Connecting to SQL Server...');
             pool = await sql.connect(config);
             console.log('✅ Connected to SQL Server!');
-
-            const result = await pool.request().query('SELECT 1 AS TestResult');
-            console.log('✅ Test query passed');
         } catch (err) {
             console.error('❌ Connection failed:', err.message);
             process.exit(1);

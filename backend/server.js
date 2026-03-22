@@ -1,66 +1,69 @@
 const express = require('express');
 const cors = require('cors');
-const { getConnection, sql } = require('./db');
+const path = require('path');
+const { getConnection } = require('./db');
 require('dotenv').config();
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-let pool;  // Will hold our database connection
+// ---- CRUD ROUTES ----
+const farmersRoute = require('./routes/farmers');
+// We'll add the rest one by one
+// const agentsRoute = require('./routes/agents');
+// const factoriesRoute = require('./routes/factories');
+// const inputsRoute = require('./routes/inputs');
+// const milkQualityRoute = require('./routes/milkQuality');
+// const loansRoute = require('./routes/loans');
+// const deliveriesRoute = require('./routes/deliveries');
+// const inputPurchasesRoute = require('./routes/inputPurchases');
+// const salesRoute = require('./routes/sales');
 
-// Health check — hit this in your browser first
+// ---- REPORT ROUTES ----
+// const farmersListReport = require('./routes/reports/farmersList');
+// const agentsCommissionReport = require('./routes/reports/agentsCommission');
+// const deliveriesReportRoute = require('./routes/reports/deliveriesReport');
+// const loansReportRoute = require('./routes/reports/loansReport');
+// const purchasesReportRoute = require('./routes/reports/purchasesReport');
+// const farmerStatementsRoute = require('./routes/reports/farmerStatements');
+
+// ---- REGISTER ROUTES ----
+app.use('/api/farmers', farmersRoute);
+// app.use('/api/agents', agentsRoute);
+// app.use('/api/factories', factoriesRoute);
+// app.use('/api/inputs', inputsRoute);
+// app.use('/api/milk-quality', milkQualityRoute);
+// app.use('/api/loans', loansRoute);
+// app.use('/api/deliveries', deliveriesRoute);
+// app.use('/api/input-purchases', inputPurchasesRoute);
+// app.use('/api/sales', salesRoute);
+
+// app.use('/api/reports/farmers-list', farmersListReport);
+// app.use('/api/reports/agents-commission', agentsCommissionReport);
+// app.use('/api/reports/deliveries', deliveriesReportRoute);
+// app.use('/api/reports/loans', loansReportRoute);
+// app.use('/api/reports/purchases', purchasesReportRoute);
+// app.use('/api/reports/farmer-statements', farmerStatementsRoute);
+
+// Health check
 app.get('/', (req, res) => {
-    res.json({ 
-        status: 'Server is running',
-        dbConnected: pool ? true : false
-    });
+    res.json({ status: '🐄 DairySphereSociety API is running' });
 });
 
-// GET all items
-app.get('/api/items', async (req, res) => {
-    try {
-        const result = await pool.request().query('SELECT * FROM TestItems');
-        console.log('📋 Fetched items:', result.recordset.length);
-        res.json(result.recordset);
-    } catch (err) {
-        console.error('❌ GET failed:', err.message);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// POST new item
-app.post('/api/items', async (req, res) => {
-    try {
-        const { name } = req.body;
-        console.log('📝 Inserting:', name);
-
-        await pool.request()
-            .input('name', sql.NVarChar, name)
-            .query('INSERT INTO TestItems (Name) VALUES (@name)');
-
-        console.log('✅ Insert successful');
-        res.status(201).json({ message: 'Item added!' });
-    } catch (err) {
-        console.error('❌ POST failed:', err.message);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// START EVERYTHING
+// Start server
 async function startServer() {
-    console.log('🚀 Starting server...\n');
+    console.log('🚀 Starting DairySphereSociety API...\n');
+    await getConnection();
 
-    // Step 1: Connect to DB FIRST
-    pool = await getConnection();
-
-    // Step 2: Only start Express AFTER DB is confirmed working
     const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
         console.log('\n========== ALL SYSTEMS GO ==========');
-        console.log(`🌐 Server:  http://localhost:${PORT}`);
-        console.log(`📡 Test:    http://localhost:${PORT}/api/items`);
+        console.log(`🐄 API:     http://localhost:${PORT}`);
+        console.log(`📡 Farmers: http://localhost:${PORT}/api/farmers`);
         console.log('=====================================');
     });
 }
