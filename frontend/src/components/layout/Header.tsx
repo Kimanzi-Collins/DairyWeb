@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, Sparkles } from 'lucide-react';
 
 const pageTitles: Record<string, string> = {
     '/': 'Dashboard',
@@ -14,72 +14,67 @@ const pageTitles: Record<string, string> = {
     '/deliveries': 'Deliveries Management',
     '/purchases': 'Input Purchases',
     '/sales': 'Sales Management',
-    '/reports/farmers-list': 'Farmers Report',
-    '/reports/agents-commission': 'Agents Commission Report',
-    '/reports/deliveries': 'Deliveries Report',
-    '/reports/loans': 'Loans Report',
-    '/reports/purchases': 'Purchases Report',
-    '/reports/statements': 'Farmer Statements',
 };
 
 export default function Header() {
     const headerRef = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
     const location = useLocation();
-
     const title = pageTitles[location.pathname] || 'DairySphere Society';
 
     useEffect(() => {
-        // Animate title change
         gsap.fromTo(titleRef.current,
-            { y: 20, opacity: 0 },
+            { y: 15, opacity: 0 },
             { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }
         );
     }, [location.pathname]);
 
     useEffect(() => {
         gsap.from(headerRef.current, {
-            y: -20,
-            opacity: 0,
-            duration: 0.6,
-            ease: 'power3.out'
+            y: -20, opacity: 0,
+            duration: 0.6, ease: 'power3.out'
         });
     }, []);
 
     return (
         <div ref={headerRef} style={styles.header}>
-            <div>
+            <div style={styles.titleSection}>
                 <h1 ref={titleRef} style={styles.title}>{title}</h1>
                 <p style={styles.subtitle}>
                     {new Date().toLocaleDateString('en-KE', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
+                        weekday: 'long', year: 'numeric',
+                        month: 'long', day: 'numeric'
                     })}
                 </p>
             </div>
 
             <div style={styles.actions}>
-                {/* Search */}
                 <div style={styles.searchBox}>
-                    <Search size={16} color="var(--text-muted)" />
+                    <Search size={16} color="rgba(255,255,255,0.4)" />
                     <input
                         type="text"
-                        placeholder="Search..."
+                        placeholder="Search anything..."
                         style={styles.searchInput}
                     />
                 </div>
 
-                {/* Notifications */}
                 <div style={styles.iconButton}>
-                    <Bell size={20} />
+                    <Bell size={18} />
                     <div style={styles.badge}>3</div>
                 </div>
 
-                {/* User */}
-                <div style={styles.userAvatar}>
-                    <span style={styles.avatarText}>AD</span>
+                <div style={styles.iconButton}>
+                    <Sparkles size={18} />
+                </div>
+
+                <div style={styles.userSection}>
+                    <div style={styles.userAvatar}>
+                        <span style={styles.avatarText}>AD</span>
+                    </div>
+                    <div style={styles.userInfo}>
+                        <span style={styles.userName}>Admin</span>
+                        <span style={styles.userRole}>Manager</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,8 +84,10 @@ export default function Header() {
 const styles: Record<string, React.CSSProperties> = {
     header: {
         height: 'var(--header-height)',
-        background: 'var(--card-white)',
-        borderBottom: '1px solid var(--border)',
+        background: 'rgba(15, 23, 42, 0.85)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -99,55 +96,64 @@ const styles: Record<string, React.CSSProperties> = {
         top: 0,
         zIndex: 50,
     },
+    titleSection: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
     title: {
-        fontSize: '22px',
+        fontSize: '20px',
         fontWeight: 700,
-        color: 'var(--text-primary)',
+        color: '#ffffff',
+        letterSpacing: '-0.3px',
     },
     subtitle: {
-        fontSize: '13px',
-        color: 'var(--text-muted)',
+        fontSize: '12px',
+        color: 'rgba(255,255,255,0.4)',
         marginTop: '2px',
     },
     actions: {
         display: 'flex',
         alignItems: 'center',
-        gap: '16px',
+        gap: '12px',
     },
     searchBox: {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        background: 'var(--background)',
-        borderRadius: '10px',
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '12px',
         padding: '8px 16px',
+        transition: 'all 0.3s ease',
     },
     searchInput: {
         border: 'none',
         outline: 'none',
         background: 'transparent',
-        fontSize: '14px',
-        color: 'var(--text-primary)',
-        width: '200px',
+        fontSize: '13px',
+        color: '#ffffff',
+        width: '180px',
         fontFamily: 'Inter, sans-serif',
     },
     iconButton: {
-        width: '40px',
-        height: '40px',
+        width: '38px',
+        height: '38px',
         borderRadius: '10px',
-        background: 'var(--background)',
+        background: 'rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.08)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         position: 'relative' as const,
-        color: 'var(--text-secondary)',
+        color: 'rgba(255,255,255,0.7)',
+        transition: 'all 0.3s ease',
     },
     badge: {
         position: 'absolute' as const,
-        top: '-2px',
-        right: '-2px',
-        background: 'var(--danger)',
+        top: '-4px',
+        right: '-4px',
+        background: 'var(--primary)',
         color: '#fff',
         fontSize: '10px',
         fontWeight: 700,
@@ -158,11 +164,19 @@ const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         justifyContent: 'center',
     },
+    userSection: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        marginLeft: '8px',
+        paddingLeft: '16px',
+        borderLeft: '1px solid rgba(255,255,255,0.08)',
+    },
     userAvatar: {
-        width: '40px',
-        height: '40px',
+        width: '36px',
+        height: '36px',
         borderRadius: '10px',
-        background: 'var(--primary-accent)',
+        background: 'linear-gradient(135deg, var(--primary), #16a34a)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -170,7 +184,20 @@ const styles: Record<string, React.CSSProperties> = {
     },
     avatarText: {
         color: '#fff',
-        fontSize: '14px',
+        fontSize: '13px',
         fontWeight: 700,
+    },
+    userInfo: {
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    userName: {
+        fontSize: '13px',
+        fontWeight: 600,
+        color: '#ffffff',
+    },
+    userRole: {
+        fontSize: '11px',
+        color: 'rgba(255,255,255,0.4)',
     },
 };

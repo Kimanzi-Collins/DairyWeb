@@ -18,38 +18,38 @@ export default function StatCard({ title, value, subtitle, icon: Icon, color, de
     useEffect(() => {
         const ctx = gsap.context(() => {
             gsap.from(cardRef.current, {
-                y: 40,
-                opacity: 0,
-                duration: 0.7,
-                delay,
+                y: 40, opacity: 0,
+                duration: 0.7, delay,
                 ease: 'power3.out'
             });
-
             gsap.from(valueRef.current, {
-                scale: 0.5,
-                opacity: 0,
-                duration: 0.5,
-                delay: delay + 0.3,
+                scale: 0.5, opacity: 0,
+                duration: 0.5, delay: delay + 0.3,
                 ease: 'back.out(1.7)'
             });
         });
-
         return () => ctx.revert();
     }, [delay]);
 
     return (
-        <div ref={cardRef} style={styles.card}>
-            <div style={styles.top}>
+        <div ref={cardRef} className="card-hover" style={styles.card}>
+            <div style={styles.header}>
                 <div style={{
                     ...styles.iconBox,
-                    background: `${color}15`,
+                    background: `${color}12`,
+                    border: `1px solid ${color}20`,
                 }}>
-                    <Icon size={22} color={color} />
+                    <Icon size={20} color={color} />
                 </div>
-                <span style={styles.title}>{title}</span>
             </div>
+            <span style={styles.title}>{title}</span>
             <div ref={valueRef} style={styles.value}>{value}</div>
             {subtitle && <div style={styles.subtitle}>{subtitle}</div>}
+            {/* Bottom accent line */}
+            <div style={{
+                ...styles.bottomLine,
+                background: `linear-gradient(90deg, ${color}, transparent)`,
+            }} />
         </div>
     );
 }
@@ -58,41 +58,51 @@ const styles: Record<string, React.CSSProperties> = {
     card: {
         background: 'var(--card-white)',
         borderRadius: 'var(--radius)',
-        padding: '24px',
+        padding: '22px 24px',
         boxShadow: 'var(--shadow)',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        cursor: 'default',
-    },
-    top: {
+        position: 'relative',
+        overflow: 'hidden',
         display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        marginBottom: '16px',
+        flexDirection: 'column',
+        minHeight: '150px',
+        border: '1px solid var(--border-light)',
+    },
+    header: {
+        marginBottom: '14px',
     },
     iconBox: {
-        width: '42px',
-        height: '42px',
+        width: '44px',
+        height: '44px',
         borderRadius: '12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
     },
     title: {
-        fontSize: '13px',
+        fontSize: '12px',
         fontWeight: 600,
         color: 'var(--text-secondary)',
         textTransform: 'uppercase' as const,
-        letterSpacing: '0.5px',
+        letterSpacing: '0.8px',
+        marginBottom: '6px',
     },
     value: {
-        fontSize: '28px',
+        fontSize: '30px',
         fontWeight: 800,
         color: 'var(--text-primary)',
-        lineHeight: 1.2,
+        lineHeight: 1.1,
+        fontFamily: 'Poppins, sans-serif',
     },
     subtitle: {
         fontSize: '13px',
         color: 'var(--text-muted)',
         marginTop: '6px',
+    },
+    bottomLine: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '3px',
     },
 };
