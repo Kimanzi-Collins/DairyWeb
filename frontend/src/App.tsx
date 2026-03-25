@@ -13,6 +13,12 @@ import Deliveries from './pages/Deliveries.tsx';
 import Loans from './pages/Loans.tsx';
 import Purchases from './pages/Purchases.tsx';
 import Sales from './pages/Sales.tsx';
+import FarmersReport from './pages/reports/FarmersReport.tsx';
+import AgentsCommissionReport from './pages/reports/AgentsCommissionReport.tsx';
+import DeliveriesReport from './pages/reports/DeliveriesReport.tsx';
+import LoansReport from './pages/reports/LoansReport.tsx';
+import PurchasesReport from './pages/reports/PurchasesReport.tsx';
+import StatementsReport from './pages/reports/StatementsReport.tsx';
 
 
 
@@ -37,6 +43,12 @@ function App() {
                 <Route path="/loans" element={<Loans />} />
                 <Route path="/purchases" element={<Purchases />} />
                 <Route path="/sales" element={<Sales />} />
+                <Route path="/reports/farmers-list" element={<FarmersReport />} />
+                <Route path="/reports/agents-commission" element={<AgentsCommissionReport />} />
+                <Route path="/reports/deliveries" element={<DeliveriesReport />} />
+                <Route path="/reports/loans" element={<LoansReport />} />
+                <Route path="/reports/purchases" element={<PurchasesReport />} />
+                <Route path="/reports/statements" element={<StatementsReport />} />
             </Route>
         </Routes>
     );

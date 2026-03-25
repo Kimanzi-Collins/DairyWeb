@@ -14,6 +14,12 @@ const titles: Record<string, string> = {
     '/deliveries': 'Deliveries',
     '/purchases': 'Purchases',
     '/sales': 'Sales',
+    '/reports/farmers-list': 'Farmers Report',
+    '/reports/agents-commission': 'Agents Commission Report',
+    '/reports/deliveries': 'Deliveries Report',
+    '/reports/loans': 'Loans Report',
+    '/reports/purchases': 'Purchases Report',
+    '/reports/statements': 'Statements Report',
 };
 
 export default function Header() {

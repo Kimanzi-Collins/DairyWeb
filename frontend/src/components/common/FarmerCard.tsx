@@ -64,7 +64,9 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
                 gsap.to(wrapperRef.current, {
                     scale: 0.95, duration: 0.15,
                     ease: 'power2.in',
-                    onComplete: () => navigate(`/farmers/${farmer.FarmerId}`)
+                    onComplete: () => {
+                        navigate(`/farmers/${farmer.FarmerId}`);
+                    }
                 });
             }}
         >

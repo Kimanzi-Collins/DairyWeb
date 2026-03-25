@@ -1,6 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const { getConnection, sql } = require('../db');
+const multer = require('multer');
+const sharp = require('sharp');
+const path = require('path');
+const fs = require('fs');
+
+const farmersUploadsDir = path.join(__dirname, '..', 'uploads', 'farmers');
+if (!fs.existsSync(farmersUploadsDir)) {
+    fs.mkdirSync(farmersUploadsDir, { recursive: true });
+}
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'));
+        }
+    },
+});
 
 // GET all farmers
 router.get('/', async (req, res) => {
@@ -124,6 +145,64 @@ router.delete('/:id', async (req, res) => {
         res.json({ message: 'Farmer deleted successfully' });
     } catch (err) {
         console.error('❌ DELETE /farmers/:id failed:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// POST upload farmer profile picture
+router.post('/:id/profile-pic', upload.single('profilePic'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No image file provided' });
+        }
+
+        const farmerId = req.params.id;
+        const safeFarmerId = farmerId.replace(/[^a-zA-Z0-9_-]/g, '');
+        const fileName = `${safeFarmerId}-${Date.now()}.jpg`;
+        const relativeUrl = `/uploads/farmers/${fileName}`;
+        const outputPath = path.join(farmersUploadsDir, fileName);
+
+        await sharp(req.file.buffer)
+            .rotate()
+            .resize(512, 512, { fit: 'cover' })
+            .jpeg({ quality: 86, mozjpeg: true })
+            .toFile(outputPath);
+
+        const pool = await getConnection();
+
+        const oldPicResult = await pool.request()
+            .input('id', sql.VarChar, farmerId)
+            .query('SELECT ProfilePicUrl FROM Farmers WHERE FarmerId = @id');
+
+        if (oldPicResult.recordset.length === 0) {
+            if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+            return res.status(404).json({ error: 'Farmer not found' });
+        }
+
+        const oldPicUrl = oldPicResult.recordset[0].ProfilePicUrl;
+
+        await pool.request()
+            .input('id', sql.VarChar, farmerId)
+            .input('profilePicUrl', sql.NVarChar, relativeUrl)
+            .query(`
+                UPDATE Farmers
+                SET ProfilePicUrl = @profilePicUrl
+                WHERE FarmerId = @id
+            `);
+
+        if (oldPicUrl && oldPicUrl.startsWith('/uploads/farmers/')) {
+            const oldFilePath = path.join(__dirname, '..', oldPicUrl.replace(/^\//, ''));
+            if (fs.existsSync(oldFilePath)) {
+                fs.unlinkSync(oldFilePath);
+            }
+        }
+
+        res.json({
+            message: 'Profile picture uploaded successfully',
+            profilePicUrl: relativeUrl,
+        });
+    } catch (err) {
+        console.error('❌ POST /farmers/:id/profile-pic failed:', err.message);
         res.status(500).json({ error: err.message });
     }
 });

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { FileText, Droplet, DollarSign, TrendingUp, Search, Plus, Edit3, Trash2, TruckElectric, BottleWine } from 'lucide-react';
+import { FileText, Droplet, DollarSign, TrendingUp, Search, Plus, Edit3, Trash2, TruckElectric } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
 import DeliveryForm from '../components/forms/DeliveryForm';
 import '../styles/Transactions.css';

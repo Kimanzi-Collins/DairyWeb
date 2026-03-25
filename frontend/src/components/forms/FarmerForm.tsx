@@ -12,6 +12,7 @@ interface FarmerFormProps {
 }
 
 export default function FarmerForm({ isOpen, onClose, onSaved, editFarmer }: FarmerFormProps) {
+    const API_BASE = 'http://localhost:3001';
     const [form, setForm] = useState({
         farmerName: '',
         dateOfBirth: '',
@@ -20,6 +21,8 @@ export default function FarmerForm({ isOpen, onClose, onSaved, editFarmer }: Far
         location: '',
         contact: '',
     });
+    const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState('');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
@@ -33,9 +36,12 @@ export default function FarmerForm({ isOpen, onClose, onSaved, editFarmer }: Far
                 location: editFarmer.Location,
                 contact: editFarmer.Contact,
             });
+            setPreviewUrl(editFarmer.ProfilePicUrl ? `${API_BASE}${editFarmer.ProfilePicUrl}` : '');
         } else {
             setForm({ farmerName: '', dateOfBirth: '', gender: '', email: '', location: '', contact: '' });
+            setPreviewUrl('');
         }
+        setProfilePicFile(null);
         setError('');
     }, [editFarmer, isOpen]);
 
@@ -53,11 +59,19 @@ export default function FarmerForm({ isOpen, onClose, onSaved, editFarmer }: Far
         setError('');
 
         try {
+            let farmerId = editFarmer?.FarmerId;
+
             if (editFarmer) {
                 await farmersAPI.update(editFarmer.FarmerId, form);
             } else {
-                await farmersAPI.create(form);
+                const created = await farmersAPI.create(form) as { FarmerId?: string };
+                farmerId = created?.FarmerId;
             }
+
+            if (profilePicFile && farmerId) {
+                await farmersAPI.uploadProfilePic(farmerId, profilePicFile);
+            }
+
             onSaved();
             onClose();
         } catch (err: any) {
@@ -65,6 +79,20 @@ export default function FarmerForm({ isOpen, onClose, onSaved, editFarmer }: Far
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setError('Please select a valid image file');
+            return;
+        }
+
+        setError('');
+        setProfilePicFile(file);
+        setPreviewUrl(URL.createObjectURL(file));
     };
 
     return (
@@ -191,6 +219,29 @@ export default function FarmerForm({ isOpen, onClose, onSaved, editFarmer }: Far
                 </FormField>
             </div>
 
+            <div style={{ marginTop: 12 }}>
+                <FormField label="Profile Picture">
+                    <div style={S.picWrap}>
+                        <div style={S.picPreviewWrap}>
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="Profile preview" style={S.picPreview} />
+                            ) : (
+                                <div style={S.picPlaceholder}>No Image</div>
+                            )}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={S.fileInput}
+                            />
+                            <p style={S.fileHint}>Recommended: square image, max 5MB.</p>
+                        </div>
+                    </div>
+                </FormField>
+            </div>
+
             {/* Buttons */}
             <div style={S.actions}>
                 <button style={S.cancelBtn} onClick={onClose}>Cancel</button>
@@ -241,5 +292,48 @@ const S: Record<string, React.CSSProperties> = {
         cursor: 'pointer',
         fontFamily: 'Plus Jakarta Sans, sans-serif',
         transition: 'all 0.2s ease',
+    },
+    picWrap: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        padding: '8px 0',
+    },
+    picPreviewWrap: {
+        width: 74,
+        height: 74,
+        borderRadius: 14,
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'rgba(255,255,255,0.04)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+    },
+    picPreview: {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+    },
+    picPlaceholder: {
+        fontSize: 11,
+        color: 'var(--text-faint)',
+        fontWeight: 600,
+    },
+    fileInput: {
+        width: '100%',
+        padding: '10px 12px',
+        borderRadius: 10,
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.04)',
+        color: 'var(--text-normal)',
+        fontSize: 12,
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
+    },
+    fileHint: {
+        marginTop: 8,
+        fontSize: 11,
+        color: 'var(--text-faint)',
     },
 };

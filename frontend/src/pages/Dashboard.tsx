@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
     Users, Truck, DollarSign, Landmark,
-    Activity, ArrowUpRight, ArrowRight, TrendingUp
+    Activity, ArrowUpRight, ArrowRight
 } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,

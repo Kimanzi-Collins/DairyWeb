@@ -40,7 +40,19 @@ export const farmersAPI = {
     getOne: (id: string) => fetchAPI(`/farmers/${id}`),
     create: (data: Record<string, unknown>) => postAPI('/farmers', data),
     update: (id: string, data: Record<string, unknown>) => putAPI(`/farmers/${id}`, data),
-    delete: (id: string) => deleteAPI(`/farmers/${id}`)
+    delete: (id: string) => deleteAPI(`/farmers/${id}`),
+    uploadProfilePic: async (id: string, file: File) => {
+        const formData = new FormData();
+        formData.append('profilePic', file);
+
+        const res = await fetch(`${API_BASE}/farmers/${id}/profile-pic`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+        return res.json();
+    },
 };
 
 export const agentsAPI = {
