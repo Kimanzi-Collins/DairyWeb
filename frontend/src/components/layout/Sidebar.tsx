@@ -38,200 +38,166 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
     return (
         <div style={{
-            ...styles.sidebar,
+            ...S.sidebar,
             width: collapsed ? '72px' : '260px',
         }}>
             {/* Logo */}
             <div style={{
-                ...styles.logoContainer,
+                ...S.logo,
                 justifyContent: collapsed ? 'center' : 'flex-start',
-                padding: collapsed ? '20px 0 16px' : '20px 20px 16px',
+                padding: collapsed ? '20px 0 12px' : '20px 20px 12px',
             }}>
-                <div style={styles.logoIconWrap}>
-                    <Leaf size={20} color="#22C55E" />
+                <div style={S.logoIcon}>
+                    <Leaf size={20} color="var(--primary)" />
                 </div>
                 {!collapsed && (
                     <div>
-                        <div style={styles.logoText}>DairySphere</div>
-                        <div style={styles.logoSub}>SOCIETY</div>
+                        <div style={S.logoText}>DairySphere</div>
+                        <div style={S.logoSub}>SOCIETY</div>
                     </div>
                 )}
             </div>
 
             {/* Toggle */}
-            <div
-                onClick={onToggle}
-                style={{
-                    ...styles.toggleBtn,
-                    justifyContent: collapsed ? 'center' : 'flex-end',
-                    padding: collapsed ? '0' : '0 16px',
-                }}
-            >
-                <div style={styles.toggleInner}>
+            <div onClick={onToggle} style={{
+                ...S.toggle,
+                justifyContent: collapsed ? 'center' : 'flex-end',
+                padding: collapsed ? '0' : '0 14px',
+            }}>
+                <div style={S.toggleBox}>
                     {collapsed
-                        ? <PanelLeft size={16} color="rgba(255,255,255,0.5)" />
-                        : <PanelLeftClose size={16} color="rgba(255,255,255,0.5)" />
+                        ? <PanelLeft size={15} color="var(--text-muted)" />
+                        : <PanelLeftClose size={15} color="var(--text-muted)" />
                     }
                 </div>
             </div>
 
-            {/* Scrollable Nav */}
-            <div style={styles.scrollArea}>
-
-                {/* Main Nav */}
-                <div style={styles.navSection}>
-                    {!collapsed && <div style={styles.navLabel}>MAIN MENU</div>}
-                    {collapsed && <div style={styles.navDivider} />}
-
-                    {mainNav.map((item) => {
-                        const isActive = item.path === '/'
-                            ? location.pathname === '/'
-                            : location.pathname.startsWith(item.path);
-
-                        return (
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                end={item.path === '/'}
-                                title={collapsed ? item.label : undefined}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '11px',
-                                    padding: collapsed ? '11px 0' : '11px 14px',
-                                    justifyContent: collapsed ? 'center' : 'flex-start',
-                                    borderRadius: '10px',
-                                    textDecoration: 'none',
-                                    fontSize: '13.5px',
-                                    fontWeight: isActive ? 600 : 500,
-                                    marginBottom: '2px',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    background: isActive ? 'rgba(34, 197, 94, 0.1)' : 'transparent',
-                                    borderLeft: isActive && !collapsed ? '3px solid #22C55E' : '3px solid transparent',
-                                    transition: 'all 0.2s ease',
-                                }}
-                            >
-                                <item.icon
-                                    size={18}
-                                    color={isActive ? '#22C55E' : '#8b9fc0'}
-                                    style={{ flexShrink: 0 }}
-                                />
-                                {!collapsed && (
-                                    <>
-                                        <span style={{
-                                            color: isActive ? '#ffffff' : '#8b9fc0',
-                                        }}>
-                                            {item.label}
-                                        </span>
-                                        {isActive && (
-                                            <ChevronRight
-                                                size={14}
-                                                color="#22C55E"
-                                                style={{ marginLeft: 'auto' }}
-                                            />
-                                        )}
-                                    </>
-                                )}
-                            </NavLink>
-                        );
-                    })}
-                </div>
-
-                {/* Reports Nav */}
-                <div style={styles.navSection}>
-                    {!collapsed && <div style={styles.navLabel}>REPORTS</div>}
-                    {collapsed && <div style={styles.navDivider} />}
-
-                    {reportNav.map((item) => {
-                        const isActive = location.pathname === item.path;
-
-                        return (
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                title={collapsed ? item.label : undefined}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '11px',
-                                    padding: collapsed ? '11px 0' : '11px 14px',
-                                    justifyContent: collapsed ? 'center' : 'flex-start',
-                                    borderRadius: '10px',
-                                    textDecoration: 'none',
-                                    fontSize: '13.5px',
-                                    fontWeight: isActive ? 600 : 500,
-                                    marginBottom: '2px',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    background: isActive ? 'rgba(34, 197, 94, 0.1)' : 'transparent',
-                                    borderLeft: isActive && !collapsed ? '3px solid #22C55E' : '3px solid transparent',
-                                    transition: 'all 0.2s ease',
-                                }}
-                            >
-                                <item.icon
-                                    size={18}
-                                    color={isActive ? '#22C55E' : '#8b9fc0'}
-                                    style={{ flexShrink: 0 }}
-                                />
-                                {!collapsed && (
-                                    <span style={{
-                                        color: isActive ? '#ffffff' : '#8b9fc0',
-                                    }}>
-                                        {item.label}
-                                    </span>
-                                )}
-                            </NavLink>
-                        );
-                    })}
-                </div>
+            {/* Navigation */}
+            <div style={S.scroll}>
+                <NavSection
+                    label="MAIN MENU"
+                    items={mainNav}
+                    collapsed={collapsed}
+                    location={location}
+                />
+                <NavSection
+                    label="REPORTS"
+                    items={reportNav}
+                    collapsed={collapsed}
+                    location={location}
+                />
             </div>
 
-            {/* Bottom Card */}
+            {/* Bottom */}
             {!collapsed ? (
-                <div style={styles.bottomCard}>
-                    <div style={{ fontSize: '18px' }}>🐄</div>
+                <div style={S.bottom}>
+                    <span style={{ fontSize: '18px' }}>🐄</span>
                     <div style={{ flex: 1 }}>
-                        <div style={styles.bottomName}>DairySphere v1.0</div>
-                        <div style={styles.bottomSub}>SQL Server Connected</div>
+                        <div style={S.bottomName}>DairySphere v1.0</div>
+                        <div style={S.bottomSub}>SQL Server Connected</div>
                     </div>
-                    <div style={styles.statusDot} />
+                    <div style={S.dot} />
                 </div>
             ) : (
-                <div style={styles.bottomCollapsed}>
-                    <div style={styles.statusDot} />
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 0' }}>
+                    <div style={S.dot} />
                 </div>
             )}
         </div>
     );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+function NavSection({ label, items, collapsed, location }: {
+    label: string;
+    items: typeof mainNav;
+    collapsed: boolean;
+    location: ReturnType<typeof useLocation>;
+}) {
+    return (
+        <div style={{ marginBottom: '14px' }}>
+            {!collapsed
+                ? <div style={S.navLabel}>{label}</div>
+                : <div style={S.divider} />
+            }
+            {items.map((item) => {
+                const isActive = item.path === '/'
+                    ? location.pathname === '/'
+                    : location.pathname.startsWith(item.path);
+
+                return (
+                    <NavLink
+                        key={item.path}
+                        to={item.path}
+                        end={item.path === '/'}
+                        title={collapsed ? item.label : undefined}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '11px',
+                            padding: collapsed ? '10px 0' : '10px 14px',
+                            justifyContent: collapsed ? 'center' : 'flex-start',
+                            borderRadius: '10px',
+                            textDecoration: 'none',
+                            fontSize: '13px',
+                            fontWeight: isActive ? 600 : 500,
+                            marginBottom: '2px',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            background: isActive ? 'rgba(139, 124, 246, 0.1)' : 'transparent',
+                            borderLeft: isActive && !collapsed
+                                ? '3px solid var(--primary)' : '3px solid transparent',
+                            transition: 'all 0.25s ease',
+                        }}
+                    >
+                        <item.icon
+                            size={18}
+                            color={isActive ? 'var(--primary)' : '#7d8590'}
+                            style={{ flexShrink: 0 }}
+                        />
+                        {!collapsed && (
+                            <>
+                                <span style={{
+                                    color: isActive ? '#e6edf3' : '#9da5ae',
+                                }}>{item.label}</span>
+                                {isActive && (
+                                    <ChevronRight size={14} color="var(--primary)"
+                                        style={{ marginLeft: 'auto' }} />
+                                )}
+                            </>
+                        )}
+                    </NavLink>
+                );
+            })}
+        </div>
+    );
+}
+
+const S: Record<string, React.CSSProperties> = {
     sidebar: {
         height: '100vh',
-        background: '#0c1220',
+        background: 'rgba(13, 17, 23, 0.75)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
         position: 'fixed',
-        left: 0,
-        top: 0,
+        left: 0, top: 0,
         zIndex: 100,
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
+        borderRight: '1px solid rgba(255,255,255,0.05)',
         overflow: 'hidden',
-        transition: 'width 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+        transition: 'width 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
     },
-    logoContainer: {
+    logo: {
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
         transition: 'all 0.3s ease',
     },
-    logoIconWrap: {
-        width: '36px',
-        height: '36px',
+    logoIcon: {
+        width: '36px', height: '36px',
         borderRadius: '10px',
-        background: 'rgba(34, 197, 94, 0.12)',
-        border: '1px solid rgba(34, 197, 94, 0.2)',
+        background: 'rgba(139, 124, 246, 0.1)',
+        border: '1px solid rgba(139, 124, 246, 0.15)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -240,88 +206,76 @@ const styles: Record<string, React.CSSProperties> = {
     logoText: {
         fontSize: '17px',
         fontWeight: 800,
-        color: '#ffffff',
+        color: '#e6edf3',
         lineHeight: 1.1,
-        fontFamily: 'Poppins, sans-serif',
         whiteSpace: 'nowrap',
     },
     logoSub: {
         fontSize: '9px',
         fontWeight: 700,
-        color: '#22C55E',
+        color: 'var(--primary)',
         letterSpacing: '3px',
     },
-    toggleBtn: {
+    toggle: {
         display: 'flex',
         alignItems: 'center',
-        marginBottom: '8px',
+        marginBottom: '10px',
         cursor: 'pointer',
     },
-    toggleInner: {
-        width: '32px',
-        height: '32px',
+    toggleBox: {
+        width: '30px', height: '30px',
         borderRadius: '8px',
         background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.06)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        transition: 'background 0.2s ease',
     },
-    scrollArea: {
+    scroll: {
         flex: 1,
         overflowY: 'auto',
         overflowX: 'hidden',
         padding: '0 8px',
     },
-    navSection: {
-        marginBottom: '12px',
-    },
     navLabel: {
         fontSize: '10px',
         fontWeight: 700,
-        color: 'rgba(255,255,255,0.25)',
+        color: 'rgba(255,255,255,0.18)',
         letterSpacing: '1.5px',
         padding: '10px 14px 6px',
         whiteSpace: 'nowrap',
     },
-    navDivider: {
+    divider: {
         height: '1px',
-        background: 'rgba(255,255,255,0.06)',
+        background: 'rgba(255,255,255,0.05)',
         margin: '8px 12px',
     },
-    bottomCard: {
+    bottom: {
         margin: '8px 10px 14px',
         padding: '12px 14px',
         background: 'rgba(255,255,255,0.03)',
         borderRadius: '10px',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.05)',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
     },
-    bottomCollapsed: {
-        display: 'flex',
-        justifyContent: 'center',
-        padding: '14px 0',
-    },
     bottomName: {
         fontSize: '11px',
         fontWeight: 600,
-        color: 'rgba(255,255,255,0.6)',
+        color: 'rgba(255,255,255,0.55)',
         whiteSpace: 'nowrap',
     },
     bottomSub: {
         fontSize: '10px',
-        color: 'rgba(255,255,255,0.25)',
+        color: 'rgba(255,255,255,0.2)',
         whiteSpace: 'nowrap',
     },
-    statusDot: {
-        width: '8px',
-        height: '8px',
+    dot: {
+        width: '8px', height: '8px',
         borderRadius: '50%',
-        background: '#22C55E',
+        background: 'var(--secondary)',
         flexShrink: 0,
-        boxShadow: '0 0 8px rgba(34, 197, 94, 0.5)',
+        boxShadow: '0 0 8px rgba(74, 222, 128, 0.5)',
     },
 };

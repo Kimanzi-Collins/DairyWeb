@@ -18,110 +18,88 @@ const API_BASE = 'http://localhost:3001';
 export default function FarmerCard({ farmer, index }: FarmerCardProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const innerRef = useRef<HTMLDivElement>(null);
-    const [, setIsFlipped] = useState(false);
+    const [, setFlipped] = useState(false);
     const navigate = useNavigate();
 
-    // Scroll-triggered smooth entrance
     useEffect(() => {
         if (!wrapperRef.current) return;
-
+        gsap.set(wrapperRef.current, { y: 70, opacity: 0, scale: 0.93 });
         const ctx = gsap.context(() => {
-            gsap.set(wrapperRef.current, {
-                opacity: 0,
-                y: 80,
-                scale: 0.92,
-            });
-
             ScrollTrigger.create({
                 trigger: wrapperRef.current,
                 start: 'top 92%',
                 onEnter: () => {
                     gsap.to(wrapperRef.current, {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
+                        y: 0, opacity: 1, scale: 1,
                         duration: 0.8,
-                        delay: (index % 4) * 0.1,
-                        ease: 'power3.out',
+                        delay: (index % 4) * 0.08,
+                        ease: 'expo.out',
                     });
                 },
                 once: true,
             });
         });
-
         return () => ctx.revert();
     }, [index]);
 
-    const handleMouseEnter = () => {
-        setIsFlipped(true);
+    const flip = (to: boolean) => {
+        setFlipped(to);
         gsap.to(innerRef.current, {
-            rotateY: 180,
+            rotateY: to ? 180 : 0,
             duration: 0.6,
             ease: 'power2.inOut'
-        });
-    };
-
-    const handleMouseLeave = () => {
-        setIsFlipped(false);
-        gsap.to(innerRef.current, {
-            rotateY: 0,
-            duration: 0.6,
-            ease: 'power2.inOut'
-        });
-    };
-
-    const handleClick = () => {
-        gsap.to(wrapperRef.current, {
-            scale: 0.95,
-            duration: 0.15,
-            ease: 'power2.in',
-            onComplete: () => navigate(`/farmers/${farmer.FarmerId}`)
         });
     };
 
     const profilePic = farmer.ProfilePicUrl
         ? `${API_BASE}${farmer.ProfilePicUrl}`
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.FarmerName)}&background=22C55E&color=fff&size=200&font-size=0.4&bold=true`;
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.FarmerName)}&background=8b7cf6&color=fff&size=200&font-size=0.4&bold=true`;
 
     return (
         <div
             ref={wrapperRef}
             style={styles.perspective}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onClick={handleClick}
+            onMouseEnter={() => flip(true)}
+            onMouseLeave={() => flip(false)}
+            onClick={() => {
+                gsap.to(wrapperRef.current, {
+                    scale: 0.95, duration: 0.15,
+                    ease: 'power2.in',
+                    onComplete: () => navigate(`/farmers/${farmer.FarmerId}`)
+                });
+            }}
         >
-            <div ref={innerRef} style={styles.cardInner}>
+            <div ref={innerRef} style={styles.inner}>
 
-                {/* FRONT */}
+                {/* ===== FRONT ===== */}
                 <div style={styles.front}>
-                    <div style={styles.accentStripe} />
+                    <div style={styles.stripe} />
 
-                    <div style={styles.profileSection}>
-                        <div style={styles.avatarWrapper}>
+                    <div style={styles.profileWrap}>
+                        <div style={{ position: 'relative' }}>
                             <img src={profilePic} alt={farmer.FarmerName} style={styles.avatar} />
                             <div style={{
-                                ...styles.statusDot,
-                                background: farmer.Age < 35 ? '#22C55E' : '#f59e0b'
+                                ...styles.dot,
+                                background: farmer.Age < 35 ? 'var(--secondary)' : 'var(--warning)',
                             }} />
                         </div>
                         <div style={styles.idBadge}>{farmer.FarmerId}</div>
                     </div>
 
                     <h3 style={styles.name}>{farmer.FarmerName}</h3>
-                    <div style={styles.locationRow}>
-                        <MapPin size={13} color="var(--text-muted)" />
-                        <span style={styles.locationText}>{farmer.Location}</span>
+                    <div style={styles.locRow}>
+                        <MapPin size={12} color="var(--primary)" />
+                        <span style={styles.locText}>{farmer.Location}</span>
                     </div>
 
-                    <div style={styles.tagRow}>
+                    <div style={styles.tags}>
                         <span style={{
                             ...styles.tag,
                             background: farmer.Gender === 'Male'
-                                ? 'rgba(34, 197, 94, 0.1)' : 'rgba(236, 72, 153, 0.1)',
-                            color: farmer.Gender === 'Male' ? '#22C55E' : '#ec4899',
+                                ? 'rgba(139, 124, 246, 0.1)' : 'rgba(236, 72, 153, 0.1)',
+                            color: farmer.Gender === 'Male' ? 'var(--primary)' : '#ec4899',
                             border: farmer.Gender === 'Male'
-                                ? '1px solid rgba(34, 197, 94, 0.2)'
+                                ? '1px solid rgba(139, 124, 246, 0.2)'
                                 : '1px solid rgba(236, 72, 153, 0.2)',
                         }}>
                             {farmer.Gender}
@@ -130,10 +108,10 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
                     </div>
                 </div>
 
-                {/* BACK */}
+                {/* ===== BACK ===== */}
                 <div style={styles.back}>
-                    <div style={styles.backContent}>
-                        <div style={styles.backHeader}>
+                    <div style={styles.backInner}>
+                        <div style={styles.backHead}>
                             <img src={profilePic} alt={farmer.FarmerName} style={styles.backAvatar} />
                             <div>
                                 <h3 style={styles.backName}>{farmer.FarmerName}</h3>
@@ -141,28 +119,16 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
                             </div>
                         </div>
 
-                        <div style={styles.backDetails}>
-                            <div style={styles.detailRow}>
-                                <Phone size={14} color="#22C55E" />
-                                <span>{farmer.Contact}</span>
-                            </div>
-                            <div style={styles.detailRow}>
-                                <Mail size={14} color="#22C55E" />
-                                <span>{farmer.Email || 'No email'}</span>
-                            </div>
-                            <div style={styles.detailRow}>
-                                <MapPin size={14} color="#22C55E" />
-                                <span>{farmer.Location}</span>
-                            </div>
-                            <div style={styles.detailRow}>
-                                <Calendar size={14} color="#22C55E" />
-                                <span>Joined: {formatDate(farmer.EnrolmentDate)}</span>
-                            </div>
+                        <div style={styles.backRows}>
+                            <div style={styles.row}><Phone size={13} color="var(--primary)" /><span>{farmer.Contact}</span></div>
+                            <div style={styles.row}><Mail size={13} color="var(--primary)" /><span>{farmer.Email || 'No email'}</span></div>
+                            <div style={styles.row}><MapPin size={13} color="var(--primary)" /><span>{farmer.Location}</span></div>
+                            <div style={styles.row}><Calendar size={13} color="var(--primary)" /><span>Joined: {formatDate(farmer.EnrolmentDate)}</span></div>
                         </div>
 
-                        <div style={styles.viewProfile}>
-                            <span>View Full Profile</span>
-                            <ArrowRight size={16} />
+                        <div style={styles.viewBtn}>
+                            <span>View Profile</span>
+                            <ArrowRight size={15} />
                         </div>
                     </div>
                 </div>
@@ -172,89 +138,83 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-    perspective: {
-        perspective: '1200px',
-        cursor: 'pointer',
-    },
-    cardInner: {
+    perspective: { perspective: '1200px', cursor: 'pointer' },
+    inner: {
         position: 'relative',
-        width: '100%',
-        height: '285px',
+        width: '100%', height: '290px',
         transformStyle: 'preserve-3d',
-        borderRadius: 'var(--radius)',
+        borderRadius: '16px',
     },
+
+    // FRONT
     front: {
         position: 'absolute',
-        width: '100%',
-        height: '100%',
+        width: '100%', height: '100%',
         backfaceVisibility: 'hidden',
-        background: 'var(--card-white)',
-        borderRadius: 'var(--radius)',
+        background: 'var(--glass-bg-card)',
+        backdropFilter: 'blur(12px) saturate(160%)',
+        border: '1px solid var(--glass-border)',
+        borderRadius: '16px',
         padding: '24px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         overflow: 'hidden',
-        border: '1px solid var(--border)',
-        boxShadow: 'var(--shadow)',
     },
-    accentStripe: {
+    stripe: {
         position: 'absolute',
         top: 0, left: 0, right: 0,
         height: '3px',
-        background: 'linear-gradient(90deg, #22C55E, #f59e0b)',
+        background: 'linear-gradient(90deg, var(--primary), var(--accent))',
     },
-    profileSection: {
+    profileWrap: {
         position: 'relative',
         marginBottom: '12px',
         marginTop: '8px',
     },
-    avatarWrapper: {
-        position: 'relative',
-    },
     avatar: {
-        width: '76px',
-        height: '76px',
+        width: '74px', height: '74px',
         borderRadius: '50%',
         objectFit: 'cover',
-        border: '3px solid var(--border-light)',
+        border: '2px solid rgba(139, 124, 246, 0.2)',
     },
-    statusDot: {
+    dot: {
         position: 'absolute',
         bottom: '2px', right: '2px',
-        width: '14px', height: '14px',
+        width: '13px', height: '13px',
         borderRadius: '50%',
-        border: '2.5px solid var(--card-white)',
+        border: '2px solid var(--base-200)',
     },
     idBadge: {
         position: 'absolute',
         top: '-4px', right: '-20px',
-        background: '#0c1220',
-        color: '#22C55E',
+        background: 'var(--base-100)',
+        color: 'var(--primary)',
         fontSize: '10px',
         fontWeight: 700,
         padding: '2px 8px',
         borderRadius: '6px',
-        letterSpacing: '0.5px',
+        border: '1px solid rgba(139, 124, 246, 0.2)',
+        letterSpacing: '0.3px',
     },
     name: {
         fontSize: '15px',
         fontWeight: 700,
-        color: 'var(--text-primary)',
+        color: 'var(--text-bright)',
         textAlign: 'center',
         marginBottom: '4px',
     },
-    locationRow: {
+    locRow: {
         display: 'flex',
         alignItems: 'center',
         gap: '4px',
         marginBottom: '14px',
     },
-    locationText: {
+    locText: {
         fontSize: '12px',
         color: 'var(--text-muted)',
     },
-    tagRow: {
+    tags: {
         display: 'flex',
         gap: '8px',
         marginTop: 'auto',
@@ -263,83 +223,85 @@ const styles: Record<string, React.CSSProperties> = {
         fontSize: '11px',
         fontWeight: 600,
         padding: '4px 12px',
-        borderRadius: '20px',
+        borderRadius: '8px',
     },
     tagNeutral: {
         fontSize: '11px',
         fontWeight: 600,
         padding: '4px 12px',
-        borderRadius: '20px',
-        background: 'var(--background)',
-        color: 'var(--text-secondary)',
-        border: '1px solid var(--border)',
+        borderRadius: '8px',
+        background: 'rgba(255,255,255,0.04)',
+        color: 'var(--text-muted)',
+        border: '1px solid var(--glass-border)',
     },
+
+    // BACK
     back: {
         position: 'absolute',
-        width: '100%',
-        height: '100%',
+        width: '100%', height: '100%',
         backfaceVisibility: 'hidden',
-        background: 'linear-gradient(145deg, #0c1220 0%, #1E293B 100%)',
-        borderRadius: 'var(--radius)',
+        background: 'rgba(13, 17, 23, 0.85)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        borderRadius: '16px',
         transform: 'rotateY(180deg)',
         padding: '24px',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid rgba(139, 124, 246, 0.1)',
     },
-    backContent: {
+    backInner: {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
     },
-    backHeader: {
+    backHead: {
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        marginBottom: '18px',
+        marginBottom: '16px',
         paddingBottom: '14px',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
     },
     backAvatar: {
-        width: '42px',
-        height: '42px',
+        width: '40px', height: '40px',
         borderRadius: '10px',
         objectFit: 'cover',
-        border: '2px solid rgba(34, 197, 94, 0.3)',
+        border: '2px solid rgba(139, 124, 246, 0.25)',
     },
     backName: {
         fontSize: '14px',
         fontWeight: 700,
-        color: '#ffffff',
+        color: 'var(--text-bright)',
     },
     backId: {
         fontSize: '11px',
-        color: '#22C55E',
+        color: 'var(--primary)',
         fontWeight: 600,
     },
-    backDetails: {
+    backRows: {
         display: 'flex',
         flexDirection: 'column',
-        gap: '11px',
+        gap: '10px',
         flex: 1,
     },
-    detailRow: {
+    row: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
         fontSize: '12.5px',
-        color: 'rgba(255,255,255,0.75)',
+        color: 'var(--text-normal)',
     },
-    viewProfile: {
+    viewBtn: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
         padding: '10px',
-        background: 'rgba(34, 197, 94, 0.12)',
-        border: '1px solid rgba(34, 197, 94, 0.2)',
+        background: 'rgba(139, 124, 246, 0.1)',
+        border: '1px solid rgba(139, 124, 246, 0.2)',
         borderRadius: '10px',
-        color: '#22C55E',
+        color: 'var(--primary)',
         fontSize: '12.5px',
         fontWeight: 600,
         marginTop: 'auto',
+        transition: 'background 0.3s ease',
     },
 };

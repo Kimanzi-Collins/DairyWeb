@@ -1,49 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --primary: #22C55E;
-    --primary-hover: #16a34a;
-    --primary-light: #DCFCE7;
-    --primary-glow: rgba(34, 197, 94, 0.15);
-    
-    --dark: #0F172A;
-    --dark-secondary: #1E293B;
-    --dark-card: #1a2332;
-    --dark-border: #2d3a4a;
-    
-    --background: #F8FAFC;
-    --card-white: #ffffff;
-    
-    --text-primary: #0F172A;
-    --text-secondary: #64748B;
-    --text-muted: #94a3b8;
-    --text-white: #f1f5f9;
-    
-    --accent-purple: #6c63ff;
-    --accent-pink: #ec4899;
-    --accent-blue: #3b82f6;
-    --accent-amber: #f59e0b;
-    
-    --success: #10b981;
-    --success-bg: #ecfdf5;
-    --danger: #ef4444;
-    --danger-bg: #fef2f2;
-    
-    --border: #e2e8f0;
-    --border-light: #f1f5f9;
-    
+    /* Your DaisyUI OKLCH Theme — mapped to hex fallbacks */
+    --base-100: #0d1117;
+    --base-200: #161b22;
+    --base-300: #21262d;
+    --base-content: #e6edf3;
+    --primary: #8b7cf6;
+    --primary-content: #1e1533;
+    --secondary: #4ade80;
+    --secondary-content: #0f2e1a;
+    --accent: #2dd4bf;
+    --accent-content: #0d312b;
+    --info: #3b82f6;
+    --info-content: #e0edff;
+    --success: #22c55e;
+    --success-content: #e0fbe9;
+    --warning: #eab308;
+    --warning-content: #fef9e0;
+    --error: #ef4444;
+    --error-content: #fde0e0;
+
+    /* Glass System */
+    --glass-bg: rgba(13, 17, 23, 0.65);
+    --glass-bg-light: rgba(22, 27, 34, 0.5);
+    --glass-bg-card: rgba(22, 27, 34, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-border-hover: rgba(255, 255, 255, 0.12);
+    --glass-blur: blur(20px) saturate(180%);
+    --glass-blur-heavy: blur(40px) saturate(200%);
+
+    /* Text */
+    --text-bright: #f0f6fc;
+    --text-normal: #c9d1d9;
+    --text-muted: #8b949e;
+    --text-faint: #484f58;
+
+    /* Layout */
     --sidebar-width: 260px;
+    --sidebar-collapsed: 72px;
     --header-height: 70px;
-    
+
+    /* Radius */
     --radius: 16px;
     --radius-sm: 10px;
     --radius-xs: 6px;
-    
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
-    --shadow-lg: 0 12px 24px rgba(0,0,0,0.1);
-    --shadow-glow: 0 8px 32px rgba(34, 197, 94, 0.12);
 }
 
 * {
@@ -52,130 +53,90 @@
     box-sizing: border-box;
 }
 
-html {
-    scroll-behavior: auto;
-}
+html { scroll-behavior: smooth; }
 
 body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    background: var(--background);
-    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: var(--base-100);
+    color: var(--base-content);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
 }
 
-h1, h2, h3, h4 {
-    font-family: 'Poppins', 'Inter', sans-serif;
+/* ====== SCROLLBAR ====== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--text-faint); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ====== GLASS CLASSES ====== */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
 }
 
-/* Premium scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: var(--text-muted);
-    border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
+.glass-card {
+    background: var(--glass-bg-card);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* Elecctro-style form inputs */
-.form-input {
-    width: 100%;
-    padding: 14px 0;
-    font-size: 15px;
-    font-family: 'Inter', sans-serif;
-    color: var(--text-primary);
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid var(--border);
-    outline: none;
-    transition: border-color 0.3s ease;
+.glass-card:hover {
+    background: rgba(22, 27, 34, 0.65);
+    border-color: var(--glass-border-hover);
+    transform: translateY(-4px);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.form-input:focus {
-    border-bottom-color: var(--primary);
+/* ====== RECHARTS FIX ====== */
+.recharts-text, .recharts-cartesian-axis-tick-value {
+    fill: var(--text-muted) !important;
+    font-size: 11px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+.recharts-cartesian-grid line {
+    stroke: rgba(255, 255, 255, 0.04) !important;
+}
+.recharts-tooltip-wrapper {
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
 }
 
-/* Animations */
-@keyframes spin {
-    to { transform: rotate(360deg); }
+/* ====== ANIMATIONS ====== */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(139, 124, 246, 0.4); }
+    50% { box-shadow: 0 0 20px rgba(139, 124, 246, 0.6); }
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
 
-@keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
-/* Card hover lift */
-.card-hover {
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-                box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.card-hover:hover {
-    transform: translateY(-6px) scale(1.01);
-    box-shadow: var(--shadow-lg);
-}
-
-/* Farmer card glow on hover */
-.farmer-card-wrapper:hover > div > div {
-    box-shadow: 0 20px 40px rgba(34, 197, 94, 0.12) !important;
-}
-
-/* Button hover scale */
+/* ====== BUTTON ====== */
 .btn-primary {
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    background: linear-gradient(135deg, var(--primary), #6d5ce7);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 24px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .btn-primary:hover {
     transform: scale(1.05);
-    box-shadow: var(--shadow-glow);
-}
-
-/* Link underline animation */
-.link-animated {
-    position: relative;
-}
-.link-animated::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--primary);
-    transition: width 0.3s ease;
-}
-.link-animated:hover::after {
-    width: 100%;
-}
-
-/* Glassmorphism */
-.glass {
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-light {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 24px rgba(139, 124, 246, 0.3);
 }

@@ -3,44 +3,44 @@ import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 import { Bell, Search, Sparkles } from 'lucide-react';
 
-const pageTitles: Record<string, string> = {
+const titles: Record<string, string> = {
     '/': 'Dashboard',
     '/farmers': 'Farmers Management',
-    '/agents': 'Agents Management',
-    '/factories': 'Factories Management',
-    '/inputs': 'Inputs Management',
+    '/agents': 'Agents',
+    '/factories': 'Factories',
+    '/inputs': 'Inputs',
     '/milk-quality': 'Milk Quality',
-    '/loans': 'Loans Management',
-    '/deliveries': 'Deliveries Management',
-    '/purchases': 'Input Purchases',
-    '/sales': 'Sales Management',
+    '/loans': 'Loans',
+    '/deliveries': 'Deliveries',
+    '/purchases': 'Purchases',
+    '/sales': 'Sales',
 };
 
 export default function Header() {
-    const headerRef = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
     const titleRef = useRef<HTMLHeadingElement>(null);
     const location = useLocation();
-    const title = pageTitles[location.pathname] || 'DairySphere Society';
+    const title = titles[location.pathname] || 'DairySphere';
 
     useEffect(() => {
         gsap.fromTo(titleRef.current,
-            { y: 15, opacity: 0 },
+            { y: 12, opacity: 0 },
             { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }
         );
     }, [location.pathname]);
 
     useEffect(() => {
-        gsap.from(headerRef.current, {
+        gsap.from(ref.current, {
             y: -20, opacity: 0,
             duration: 0.6, ease: 'power3.out'
         });
     }, []);
 
     return (
-        <div ref={headerRef} style={styles.header}>
-            <div style={styles.titleSection}>
+        <div ref={ref} style={styles.header} className="glass">
+            <div>
                 <h1 ref={titleRef} style={styles.title}>{title}</h1>
-                <p style={styles.subtitle}>
+                <p style={styles.date}>
                     {new Date().toLocaleDateString('en-KE', {
                         weekday: 'long', year: 'numeric',
                         month: 'long', day: 'numeric'
@@ -49,31 +49,24 @@ export default function Header() {
             </div>
 
             <div style={styles.actions}>
-                <div style={styles.searchBox}>
-                    <Search size={16} color="rgba(255,255,255,0.4)" />
-                    <input
-                        type="text"
-                        placeholder="Search anything..."
-                        style={styles.searchInput}
-                    />
+                <div style={styles.search}>
+                    <Search size={15} color="var(--text-faint)" />
+                    <input placeholder="Search..." style={styles.searchInput} />
                 </div>
 
-                <div style={styles.iconButton}>
-                    <Bell size={18} />
+                <div style={styles.iconBtn}>
+                    <Bell size={17} color="var(--text-muted)" />
                     <div style={styles.badge}>3</div>
                 </div>
-
-                <div style={styles.iconButton}>
-                    <Sparkles size={18} />
+                <div style={styles.iconBtn}>
+                    <Sparkles size={17} color="var(--primary)" />
                 </div>
 
-                <div style={styles.userSection}>
-                    <div style={styles.userAvatar}>
-                        <span style={styles.avatarText}>AD</span>
-                    </div>
-                    <div style={styles.userInfo}>
-                        <span style={styles.userName}>Admin</span>
-                        <span style={styles.userRole}>Manager</span>
+                <div style={styles.userWrap}>
+                    <div style={styles.avatar}>AD</div>
+                    <div>
+                        <div style={styles.userName}>Admin</div>
+                        <div style={styles.userRole}>Manager</div>
                     </div>
                 </div>
             </div>
@@ -84,10 +77,6 @@ export default function Header() {
 const styles: Record<string, React.CSSProperties> = {
     header: {
         height: 'var(--header-height)',
-        background: 'rgba(15, 23, 42, 0.85)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -95,109 +84,92 @@ const styles: Record<string, React.CSSProperties> = {
         position: 'sticky',
         top: 0,
         zIndex: 50,
-    },
-    titleSection: {
-        display: 'flex',
-        flexDirection: 'column',
+        borderRadius: 0,
     },
     title: {
-        fontSize: '20px',
+        fontSize: '19px',
         fontWeight: 700,
-        color: '#ffffff',
+        color: 'var(--text-bright)',
         letterSpacing: '-0.3px',
     },
-    subtitle: {
-        fontSize: '12px',
-        color: 'rgba(255,255,255,0.4)',
+    date: {
+        fontSize: '11px',
+        color: 'var(--text-faint)',
         marginTop: '2px',
     },
     actions: {
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
+        gap: '10px',
     },
-    searchBox: {
+    search: {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        background: 'rgba(255,255,255,0.06)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '12px',
-        padding: '8px 16px',
-        transition: 'all 0.3s ease',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid var(--glass-border)',
+        borderRadius: '10px',
+        padding: '7px 14px',
     },
     searchInput: {
         border: 'none',
         outline: 'none',
         background: 'transparent',
         fontSize: '13px',
-        color: '#ffffff',
-        width: '180px',
-        fontFamily: 'Inter, sans-serif',
+        color: 'var(--text-normal)',
+        width: '160px',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
     },
-    iconButton: {
-        width: '38px',
-        height: '38px',
+    iconBtn: {
+        width: '36px', height: '36px',
         borderRadius: '10px',
-        background: 'rgba(255,255,255,0.06)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid var(--glass-border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         position: 'relative' as const,
-        color: 'rgba(255,255,255,0.7)',
-        transition: 'all 0.3s ease',
     },
     badge: {
         position: 'absolute' as const,
-        top: '-4px',
-        right: '-4px',
+        top: '-3px', right: '-3px',
         background: 'var(--primary)',
         color: '#fff',
-        fontSize: '10px',
+        fontSize: '9px',
         fontWeight: 700,
-        width: '18px',
-        height: '18px',
+        width: '16px', height: '16px',
         borderRadius: '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
     },
-    userSection: {
+    userWrap: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
         marginLeft: '8px',
-        paddingLeft: '16px',
-        borderLeft: '1px solid rgba(255,255,255,0.08)',
+        paddingLeft: '14px',
+        borderLeft: '1px solid var(--glass-border)',
     },
-    userAvatar: {
-        width: '36px',
-        height: '36px',
+    avatar: {
+        width: '34px', height: '34px',
         borderRadius: '10px',
-        background: 'linear-gradient(135deg, var(--primary), #16a34a)',
+        background: 'linear-gradient(135deg, var(--primary), #6d5ce7)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        cursor: 'pointer',
-    },
-    avatarText: {
         color: '#fff',
-        fontSize: '13px',
+        fontSize: '12px',
         fontWeight: 700,
     },
-    userInfo: {
-        display: 'flex',
-        flexDirection: 'column',
-    },
     userName: {
-        fontSize: '13px',
+        fontSize: '12px',
         fontWeight: 600,
-        color: '#ffffff',
+        color: 'var(--text-bright)',
     },
     userRole: {
-        fontSize: '11px',
-        color: 'rgba(255,255,255,0.4)',
+        fontSize: '10px',
+        color: 'var(--text-faint)',
     },
 };

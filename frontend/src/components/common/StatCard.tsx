@@ -12,97 +12,107 @@ interface StatCardProps {
 }
 
 export default function StatCard({ title, value, subtitle, icon: Icon, color, delay = 0 }: StatCardProps) {
-    const cardRef = useRef<HTMLDivElement>(null);
-    const valueRef = useRef<HTMLDivElement>(null);
+    const ref = useRef<HTMLDivElement>(null);
+    const valRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
-            gsap.from(cardRef.current, {
-                y: 40, opacity: 0,
-                duration: 0.7, delay,
-                ease: 'power3.out'
-            });
-            gsap.from(valueRef.current, {
-                scale: 0.5, opacity: 0,
-                duration: 0.5, delay: delay + 0.3,
-                ease: 'back.out(1.7)'
-            });
+    if (!ref.current) return;
+    // Set initial state immediately so card is never invisible
+    gsap.set(ref.current, { opacity: 1, y: 0 });
+    
+    const ctx = gsap.context(() => {
+        gsap.from(ref.current, {
+            y: 30, opacity: 0,
+            duration: 0.6,
+            delay: Math.min(delay, 0.3), // Cap max delay to 0.3s
+            ease: 'expo.out'
         });
-        return () => ctx.revert();
-    }, [delay]);
+        gsap.from(valRef.current, {
+            scale: 0.8, opacity: 0,
+            duration: 0.4,
+            delay: Math.min(delay, 0.3) + 0.15,
+            ease: 'back.out(1.5)'
+        });
+    });
+    return () => ctx.revert();
+}, [delay]);
 
     return (
-        <div ref={cardRef} className="card-hover" style={styles.card}>
-            <div style={styles.header}>
+        <div ref={ref} style={S.card}
+            onMouseEnter={(e) => {
+                gsap.to(e.currentTarget, {
+                    y: -4, duration: 0.3, ease: 'power2.out',
+                    boxShadow: '0 16px 32px rgba(0,0,0,0.3)'
+                });
+            }}
+            onMouseLeave={(e) => {
+                gsap.to(e.currentTarget, {
+                    y: 0, duration: 0.3, ease: 'power2.out',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+                });
+            }}
+        >
+            <div style={S.iconRow}>
                 <div style={{
-                    ...styles.iconBox,
-                    background: `${color}12`,
-                    border: `1px solid ${color}20`,
+                    width: 42, height: 42,
+                    borderRadius: 12,
+                    background: `${color}14`,
+                    border: `1px solid ${color}25`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}>
                     <Icon size={20} color={color} />
                 </div>
             </div>
-            <span style={styles.title}>{title}</span>
-            <div ref={valueRef} style={styles.value}>{value}</div>
-            {subtitle && <div style={styles.subtitle}>{subtitle}</div>}
-            {/* Bottom accent line */}
+            <div style={S.title}>{title}</div>
+            <div ref={valRef} style={S.value}>{value}</div>
+            {subtitle && <div style={S.sub}>{subtitle}</div>}
             <div style={{
-                ...styles.bottomLine,
+                position: 'absolute',
+                bottom: 0, left: 0, right: 0,
+                height: '2px',
                 background: `linear-gradient(90deg, ${color}, transparent)`,
             }} />
         </div>
     );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const S: Record<string, React.CSSProperties> = {
     card: {
-        background: 'var(--card-white)',
-        borderRadius: 'var(--radius)',
+        background: 'rgba(22, 27, 34, 0.55)',
+        backdropFilter: 'blur(12px) saturate(160%)',
+        border: '1px solid rgba(255,255,255,0.05)',
+        borderRadius: '16px',
         padding: '22px 24px',
-        boxShadow: 'var(--shadow)',
         position: 'relative',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '150px',
-        border: '1px solid var(--border-light)',
+        minHeight: '155px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+        transition: 'all 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
     },
-    header: {
+    iconRow: {
         marginBottom: '14px',
     },
-    iconBox: {
-        width: '44px',
-        height: '44px',
-        borderRadius: '12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     title: {
-        fontSize: '12px',
-        fontWeight: 600,
-        color: 'var(--text-secondary)',
+        fontSize: '11px',
+        fontWeight: 700,
+        color: '#8b949e',
         textTransform: 'uppercase' as const,
         letterSpacing: '0.8px',
         marginBottom: '6px',
     },
     value: {
-        fontSize: '30px',
+        fontSize: '26px',
         fontWeight: 800,
-        color: 'var(--text-primary)',
+        color: '#e6edf3',
         lineHeight: 1.1,
-        fontFamily: 'Poppins, sans-serif',
     },
-    subtitle: {
-        fontSize: '13px',
-        color: 'var(--text-muted)',
+    sub: {
+        fontSize: '12px',
+        color: '#484f58',
         marginTop: '6px',
-    },
-    bottomLine: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '3px',
     },
 };

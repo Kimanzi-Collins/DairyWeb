@@ -10,41 +10,42 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Layout() {
     const contentRef = useRef<HTMLDivElement>(null);
     const location = useLocation();
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(false);
 
-    // Page transition
     useEffect(() => {
         const ctx = gsap.context(() => {
+            // Liquid page transition with blur
             gsap.fromTo(contentRef.current,
-                { opacity: 0, y: 30 },
-                { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
+                { opacity: 0, y: 20, filter: 'blur(8px)' },
+                { opacity: 1, y: 0, filter: 'blur(0px)',
+                  duration: 0.7, ease: 'expo.out' }
             );
         });
-
-        // Small delay to let DOM render, then refresh ScrollTrigger
-        setTimeout(() => ScrollTrigger.refresh(), 100);
-
+        setTimeout(() => ScrollTrigger.refresh(), 200);
         return () => ctx.revert();
     }, [location.pathname]);
 
-    const marginLeft = sidebarCollapsed ? '72px' : '260px';
+    const ml = collapsed ? '72px' : '260px';
 
     return (
         <div style={styles.wrapper}>
-            <Sidebar
-                collapsed={sidebarCollapsed}
-                onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-            />
-            <div style={{
+            {/* Background image layer — change URL for different pages */}
+            <div style={styles.bgLayer} />
+            {/* Gradient overlay */}
+            <div style={styles.gradientOverlay} />
+
+            <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+
+            <main style={{
                 ...styles.main,
-                marginLeft,
-                transition: 'margin-left 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                marginLeft: ml,
+                transition: 'margin-left 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
             }}>
                 <Header />
                 <div ref={contentRef} style={styles.content}>
                     <Outlet />
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
@@ -53,13 +54,37 @@ const styles: Record<string, React.CSSProperties> = {
     wrapper: {
         display: 'flex',
         minHeight: '100vh',
-        background: 'var(--background)',
+        position: 'relative',
+    },
+    bgLayer: {
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        backgroundImage: `url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=2074&auto=format&fit=crop')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        opacity: 0.05,
+        filter: 'grayscale(80%)',
+        zIndex: 0,
+    },
+    gradientOverlay: {
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        background: `
+            radial-gradient(ellipse at 0% 0%, rgba(139, 124, 246, 0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 100% 100%, rgba(74, 222, 128, 0.05) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(45, 212, 191, 0.03) 0%, transparent 60%)
+        `,
+        zIndex: 0,
     },
     main: {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
+        position: 'relative',
+        zIndex: 1,
     },
     content: {
         padding: '28px 32px',

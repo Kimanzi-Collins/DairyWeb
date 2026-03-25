@@ -6,41 +6,38 @@ import type { Farmer } from '../../types';
 import { farmersAPI } from '../../api';
 import FarmerCard from '../../components/common/FarmerCard';
 import StatCard from '../../components/common/StatCard';
+import FarmerForm from '../../components/forms/FarmerForm';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function FarmersList() {
     const [farmers, setFarmers] = useState<Farmer[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
+    const [formOpen, setFormOpen] = useState(false);
+    const [editFarmer, setEditFarmer] = useState<Farmer | null>(null);
 
-    useEffect(() => {
-        loadFarmers();
-    }, []);
+    useEffect(() => { load(); }, []);
 
-    const loadFarmers = async () => {
+    const load = async () => {
         try {
             const data = await farmersAPI.getAll() as Farmer[];
             setFarmers(data);
             setLoading(false);
-
-            // Refresh ScrollTrigger after data loads
             setTimeout(() => ScrollTrigger.refresh(), 200);
-        } catch (err) {
-            console.error('Failed to load farmers:', err);
-            setLoading(false);
-        }
+        } catch { setLoading(false); }
     };
 
     const filtered = farmers.filter(f =>
-        f.FarmerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.FarmerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.Location.toLowerCase().includes(searchTerm.toLowerCase())
+        f.FarmerName.toLowerCase().includes(search.toLowerCase()) ||
+        f.FarmerId.toLowerCase().includes(search.toLowerCase()) ||
+        f.Location.toLowerCase().includes(search.toLowerCase())
     );
 
-    const grouped = filtered.reduce((acc, farmer) => {
-        if (!acc[farmer.Location]) acc[farmer.Location] = [];
-        acc[farmer.Location].push(farmer);
+    const grouped = filtered.reduce((acc, f) => {
+        if (!acc[f.Location]) acc[f.Location] = [];
+        acc[f.Location].push(f);
         return acc;
     }, {} as Record<string, Farmer[]>);
 
@@ -48,13 +45,12 @@ export default function FarmersList() {
     const males = farmers.filter(f => f.Gender === 'Male').length;
     const females = farmers.filter(f => f.Gender === 'Female').length;
     const avgAge = farmers.length
-        ? Math.round(farmers.reduce((a, f) => a + f.Age, 0) / farmers.length)
-        : 0;
+        ? Math.round(farmers.reduce((a, f) => a + f.Age, 0) / farmers.length) : 0;
 
     if (loading) {
         return (
-            <div style={styles.loading}>
-                <div style={styles.spinner} />
+            <div style={S.loading}>
+                <div style={S.spinner} />
                 <p style={{ color: 'var(--text-muted)' }}>Loading farmers...</p>
             </div>
         );
@@ -63,155 +59,149 @@ export default function FarmersList() {
     return (
         <div>
             {/* Stats */}
-            <div style={styles.statsGrid}>
+            <div style={S.statsGrid}>
                 <StatCard title="Total Farmers" value={farmers.length}
                     subtitle={`${locations.length} locations`}
-                    icon={Users} color="#22C55E" delay={0} />
+                    icon={Users} color="#8b7cf6" delay={0} />
                 <StatCard title="Male Farmers" value={males}
-                    subtitle={`${farmers.length ? ((males / farmers.length) * 100).toFixed(0) : 0}% of total`}
+                    subtitle={`${farmers.length ? ((males / farmers.length) * 100).toFixed(0) : 0}%`}
                     icon={Users} color="#3b82f6" delay={0.1} />
                 <StatCard title="Female Farmers" value={females}
-                    subtitle={`${farmers.length ? ((females / farmers.length) * 100).toFixed(0) : 0}% of total`}
+                    subtitle={`${farmers.length ? ((females / farmers.length) * 100).toFixed(0) : 0}%`}
                     icon={Users} color="#ec4899" delay={0.2} />
                 <StatCard title="Average Age" value={avgAge}
                     subtitle="years old"
-                    icon={Users} color="#f59e0b" delay={0.3} />
+                    icon={Users} color="#2dd4bf" delay={0.3} />
             </div>
 
             {/* Toolbar */}
-            <div style={styles.toolbar}>
-                <div style={styles.searchWrapper}>
-                    <Search size={18} color="var(--text-muted)" />
+            <div style={S.toolbar}>
+                <div style={S.searchBox} className="glass-card">
+                    <Search size={16} color="var(--text-faint)" />
                     <input
                         type="text"
                         placeholder="Search by name, ID, or location..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        style={styles.searchInput}
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        style={S.searchInput}
                     />
                 </div>
-                <button className="btn-primary" style={styles.addButton}>
-                    <UserPlus size={18} />
+                <button className="btn-primary"
+                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                    onClick={() => {
+                            setEditFarmer(null);
+                            setFormOpen(true);
+                        }}
+                >
+                    <UserPlus size={16} />
                     <span>Add Farmer</span>
                 </button>
+                
             </div>
 
             {/* Grouped Cards */}
-            {locations.map((location) => (
-                <div key={location} style={styles.locationGroup}>
-                    <div style={styles.locationHeader}>
-                        <div style={styles.locationDot} />
-                        <MapPin size={16} color="#22C55E" />
-                        <h2 style={styles.locationTitle}>{location}</h2>
-                        <span style={styles.locationCount}>
-                            {grouped[location].length} farmer{grouped[location].length > 1 ? 's' : ''}
+            {locations.map((loc) => (
+                <div key={loc} style={S.group}>
+                    <div style={S.groupHeader}>
+                        <div style={S.groupDot} />
+                        <MapPin size={15} color="var(--primary)" />
+                        <h2 style={S.groupTitle}>{loc}</h2>
+                        <span style={S.groupCount}>
+                            {grouped[loc].length} farmer{grouped[loc].length > 1 ? 's' : ''}
                         </span>
-                        <div style={styles.locationLine} />
+                        <div style={S.groupLine} />
                     </div>
-                    <div style={styles.cardGrid}>
-                        {grouped[location]
+                    <div style={S.cardGrid}>
+                        {grouped[loc]
                             .sort((a, b) => b.FarmerId.localeCompare(a.FarmerId))
-                            .map((farmer, index) => (
-                                <FarmerCard
-                                    key={farmer.FarmerId}
-                                    farmer={farmer}
-                                    index={index}
-                                />
+                            .map((farmer, i) => (
+                                <FarmerCard key={farmer.FarmerId} farmer={farmer} index={i} />
                             ))}
                     </div>
                 </div>
             ))}
+            {/* Farmer Form Modal */}
+            <FarmerForm
+                isOpen={formOpen}
+                onClose={() => setFormOpen(false)}
+                onSaved={() => {
+                    load();
+                    setTimeout(() => ScrollTrigger.refresh(), 300);
+                }}
+                editFarmer={editFarmer}
+            />
         </div>
     );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const S: Record<string, React.CSSProperties> = {
     statsGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '20px',
-        marginBottom: '28px',
+        gap: '16px',
+        marginBottom: '24px',
+        alignItems: 'stretch',
     },
     toolbar: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '32px',
+        marginBottom: '28px',
     },
-    searchWrapper: {
+    searchBox: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        background: 'var(--card-white)',
+        padding: '10px 18px',
+        width: '380px',
         borderRadius: '12px',
-        padding: '10px 20px',
-        boxShadow: 'var(--shadow)',
-        width: '400px',
-        border: '1px solid var(--border)',
     },
     searchInput: {
         border: 'none',
         outline: 'none',
         background: 'transparent',
-        fontSize: '14px',
-        fontFamily: 'Inter, sans-serif',
-        color: 'var(--text-primary)',
+        fontSize: '13px',
+        color: 'var(--text-normal)',
         width: '100%',
+        fontFamily: 'Plus Jakarta Sans, sans-serif',
     },
-    addButton: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '11px 24px',
-        background: '#22C55E',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '12px',
-        fontSize: '14px',
-        fontWeight: 600,
-        cursor: 'pointer',
-        fontFamily: 'Inter, sans-serif',
-    },
-    locationGroup: {
-        marginBottom: '36px',
-    },
-    locationHeader: {
+    group: { marginBottom: '32px' },
+    groupHeader: {
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
-        marginBottom: '18px',
+        marginBottom: '16px',
     },
-    locationDot: {
-        width: '8px',
-        height: '8px',
+    groupDot: {
+        width: '8px', height: '8px',
         borderRadius: '50%',
-        background: '#22C55E',
-        boxShadow: '0 0 8px rgba(34, 197, 94, 0.4)',
+        background: 'var(--primary)',
+        boxShadow: '0 0 8px rgba(139, 124, 246, 0.4)',
     },
-    locationTitle: {
-        fontSize: '17px',
+    groupTitle: {
+        fontSize: '16px',
         fontWeight: 700,
-        color: 'var(--text-primary)',
+        color: 'var(--text-bright)',
     },
-    locationCount: {
+    groupCount: {
         fontSize: '11px',
         fontWeight: 600,
-        color: 'var(--text-muted)',
-        background: 'var(--background)',
-        padding: '3px 12px',
-        borderRadius: '20px',
-        border: '1px solid var(--border)',
+        color: 'var(--text-faint)',
+        background: 'rgba(255,255,255,0.04)',
+        padding: '3px 10px',
+        borderRadius: '8px',
+        border: '1px solid var(--glass-border)',
     },
-    locationLine: {
+    groupLine: {
         flex: 1,
         height: '1px',
-        background: 'var(--border)',
+        background: 'var(--glass-border)',
         marginLeft: '8px',
     },
     cardGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-        gap: '20px',
+        gap: '18px',
     },
     loading: {
         display: 'flex',
@@ -222,10 +212,9 @@ const styles: Record<string, React.CSSProperties> = {
         gap: '16px',
     },
     spinner: {
-        width: '40px',
-        height: '40px',
-        border: '3px solid var(--border)',
-        borderTopColor: '#22C55E',
+        width: '40px', height: '40px',
+        border: '3px solid var(--base-300)',
+        borderTopColor: 'var(--primary)',
         borderRadius: '50%',
         animation: 'spin 0.8s linear infinite',
     },
