@@ -45,9 +45,14 @@ router.get('/:id', async (req, res) => {
 // POST new input
 router.post('/', async (req, res) => {
     try {
-        const { inputName, inputPrice } = req.body;
+        const inputName = (req.body.inputName ?? req.body.InputName ?? '').trim();
+        const inputPrice = Number(req.body.inputPrice ?? req.body.InputPrice);
 
-        if (!inputPrice || inputPrice <= 0) {
+        if (!inputName) {
+            return res.status(400).json({ error: 'Input name is required' });
+        }
+
+        if (!Number.isFinite(inputPrice) || inputPrice <= 0) {
             return res.status(400).json({ error: 'Price must be greater than 0' });
         }
 
@@ -72,9 +77,14 @@ router.post('/', async (req, res) => {
 // PUT update input
 router.put('/:id', async (req, res) => {
     try {
-        const { inputName, inputPrice } = req.body;
+        const inputName = (req.body.inputName ?? req.body.InputName ?? '').trim();
+        const inputPrice = Number(req.body.inputPrice ?? req.body.InputPrice);
 
-        if (!inputPrice || inputPrice <= 0) {
+        if (!inputName) {
+            return res.status(400).json({ error: 'Input name is required' });
+        }
+
+        if (!Number.isFinite(inputPrice) || inputPrice <= 0) {
             return res.status(400).json({ error: 'Price must be greater than 0' });
         }
 

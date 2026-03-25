@@ -45,7 +45,13 @@ router.get('/:id', async (req, res) => {
 // POST new agent
 router.post('/', async (req, res) => {
     try {
-        const { agentName, contact, location } = req.body;
+        const agentName = (req.body.agentName ?? req.body.AgentName ?? '').trim();
+        const contact = (req.body.contact ?? req.body.Contact ?? '').trim();
+        const location = (req.body.location ?? req.body.Location ?? '').trim();
+
+        if (!agentName || !contact || !location) {
+            return res.status(400).json({ error: 'Agent name, contact and location are required' });
+        }
 
         const pool = await getConnection();
         const result = await pool.request()
@@ -69,7 +75,13 @@ router.post('/', async (req, res) => {
 // PUT update agent
 router.put('/:id', async (req, res) => {
     try {
-        const { agentName, contact, location } = req.body;
+        const agentName = (req.body.agentName ?? req.body.AgentName ?? '').trim();
+        const contact = (req.body.contact ?? req.body.Contact ?? '').trim();
+        const location = (req.body.location ?? req.body.Location ?? '').trim();
+
+        if (!agentName || !contact || !location) {
+            return res.status(400).json({ error: 'Agent name, contact and location are required' });
+        }
 
         const pool = await getConnection();
         const result = await pool.request()

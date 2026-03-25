@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { FileText, Droplet, DollarSign, TrendingUp, Search, Plus, Edit3, Trash2 } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
-import Modal from '../components/common/Modal';
 import DeliveryForm from '../components/forms/DeliveryForm';
 import '../styles/Transactions.css';
 
@@ -13,7 +12,7 @@ const Deliveries = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
+  const [, setEditItem] = useState<any>(null);
   const animated = useRef(false);
 
   const load = async () => {
@@ -96,8 +95,8 @@ const Deliveries = () => {
                     <td>{fmtDate(d.DeliveryDate)}</td>
                     <td className="amount-cell">{fmt(d.Amount)}</td>
                     <td className="actions-cell">
-                      <button type="button" className="action-btn edit" onClick={() => { setEditItem(d); setFormOpen(true); }}><Edit3 size={14} /></button>
-                      <button type="button" className="action-btn delete" onClick={() => handleDelete(d.DeliveryId)}><Trash2 size={14} /></button>
+                      <button type="button" title="Edit delivery" className="action-btn edit" onClick={() => { setEditItem(d); setFormOpen(true); }}><Edit3 size={14} /></button>
+                      <button type="button" title="Delete delivery" className="action-btn delete" onClick={() => handleDelete(d.DeliveryId)}><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
@@ -107,9 +106,11 @@ const Deliveries = () => {
         )}
       </div>
 
-      <Modal isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} title={editItem ? 'Edit Delivery' : 'Add New Delivery'}>
-        <DeliveryForm mode={editItem ? 'edit' : 'add'} initialData={editItem} onSuccess={() => { load(); setFormOpen(false); setEditItem(null); }} onClose={() => { setFormOpen(false); setEditItem(null); }} />
-      </Modal>
+      <DeliveryForm
+        isOpen={formOpen}
+        onSaved={() => { load(); setFormOpen(false); setEditItem(null); }}
+        onClose={() => { setFormOpen(false); setEditItem(null); }}
+      />
     </div>
   );
 };

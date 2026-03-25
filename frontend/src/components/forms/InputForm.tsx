@@ -10,15 +10,15 @@ interface Props {
 }
 
 const InputForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
-  const [formData, setFormData] = useState({ InputName: '', InputPrice: '' });
+  const [formData, setFormData] = useState({ inputName: '', inputPrice: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       setFormData({
-        InputName: initialData.InputName || '',
-        InputPrice: String(initialData.InputPrice || ''),
+        inputName: initialData.InputName || '',
+        inputPrice: String(initialData.InputPrice || ''),
       });
     }
   }, [mode, initialData]);
@@ -33,7 +33,7 @@ const InputForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
       const res = await fetch(url, {
         method: mode === 'add' ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, InputPrice: Number(formData.InputPrice) }),
+        body: JSON.stringify({ ...formData, inputPrice: Number(formData.inputPrice) }),
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed to save');
       onSuccess();
@@ -47,11 +47,11 @@ const InputForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
       <div className="form-grid">
         <div className="form-group">
           <label className="form-label">INPUT NAME *</label>
-          <input type="text" name="InputName" value={formData.InputName} onChange={handleChange} placeholder="e.g. Dairy Meal" className="form-input" required />
+          <input type="text" name="inputName" value={formData.inputName} onChange={handleChange} placeholder="e.g. Dairy Meal" className="form-input" required />
         </div>
         <div className="form-group">
           <label className="form-label">PRICE PER UNIT (Ksh.) *</label>
-          <input type="number" name="InputPrice" value={formData.InputPrice} onChange={handleChange} placeholder="e.g. 2500.00" className="form-input" step="0.01" min="0.01" required />
+          <input type="number" name="inputPrice" value={formData.inputPrice} onChange={handleChange} placeholder="e.g. 2500.00" className="form-input" step="0.01" min="0.01" required />
         </div>
       </div>
       <div className="form-actions">

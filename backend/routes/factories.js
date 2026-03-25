@@ -45,11 +45,18 @@ router.get('/:id', async (req, res) => {
 // POST new factory
 router.post('/', async (req, res) => {
     try {
-        const { factoryName, location, contact } = req.body;
+        const factoryName = (req.body.factoryName ?? req.body.FactoryName ?? '').trim();
+        const location = (req.body.location ?? req.body.Location ?? '').trim();
+        const rawContact = String(req.body.contact ?? req.body.Contact ?? '').trim();
+        const contact = rawContact.replace(/\D/g, '');
 
         // Validate contact length
-        if (!contact || contact.length !== 10) {
+        if (contact.length !== 10) {
             return res.status(400).json({ error: 'Contact must be exactly 10 characters' });
+        }
+
+        if (!factoryName || !location) {
+            return res.status(400).json({ error: 'Factory name and location are required' });
         }
 
         const pool = await getConnection();
@@ -74,10 +81,17 @@ router.post('/', async (req, res) => {
 // PUT update factory
 router.put('/:id', async (req, res) => {
     try {
-        const { factoryName, location, contact } = req.body;
+        const factoryName = (req.body.factoryName ?? req.body.FactoryName ?? '').trim();
+        const location = (req.body.location ?? req.body.Location ?? '').trim();
+        const rawContact = String(req.body.contact ?? req.body.Contact ?? '').trim();
+        const contact = rawContact.replace(/\D/g, '');
 
-        if (!contact || contact.length !== 10) {
+        if (contact.length !== 10) {
             return res.status(400).json({ error: 'Contact must be exactly 10 characters' });
+        }
+
+        if (!factoryName || !location) {
+            return res.status(400).json({ error: 'Factory name and location are required' });
         }
 
         const pool = await getConnection();

@@ -10,16 +10,16 @@ interface Props {
 }
 
 const FactoryForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
-  const [formData, setFormData] = useState({ FactoryName: '', Location: '', Contact: '' });
+  const [formData, setFormData] = useState({ factoryName: '', location: '', contact: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       setFormData({
-        FactoryName: initialData.FactoryName || '',
-        Location: initialData.Location || '',
-        Contact: initialData.Contact || '',
+        factoryName: initialData.FactoryName || '',
+        location: initialData.Location || '',
+        contact: initialData.Contact || '',
       });
     }
   }, [mode, initialData]);
@@ -31,7 +31,11 @@ const FactoryForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
     e.preventDefault(); setLoading(true); setError('');
     try {
       const url = mode === 'add' ? `${API}/factories` : `${API}/factories/${initialData?.FactoryId}`;
-      const res = await fetch(url, { method: mode === 'add' ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+      const payload = {
+        ...formData,
+        contact: formData.contact.replace(/\D/g, ''),
+      };
+      const res = await fetch(url, { method: mode === 'add' ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed to save');
       onSuccess();
     } catch (err: any) { setError(err.message); }
@@ -44,15 +48,15 @@ const FactoryForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
       <div className="form-grid">
         <div className="form-group">
           <label className="form-label">FACTORY NAME *</label>
-          <input type="text" name="FactoryName" value={formData.FactoryName} onChange={handleChange} placeholder="e.g. Brookside Dairies" className="form-input" required />
+          <input type="text" name="factoryName" value={formData.factoryName} onChange={handleChange} placeholder="e.g. Brookside Dairies" className="form-input" required />
         </div>
         <div className="form-group">
           <label className="form-label">LOCATION *</label>
-          <input type="text" name="Location" value={formData.Location} onChange={handleChange} placeholder="e.g. Ruiru" className="form-input" required />
+          <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="e.g. Ruiru" className="form-input" required />
         </div>
         <div className="form-group full-width">
           <label className="form-label">CONTACT * (10 digits)</label>
-          <input type="text" name="Contact" value={formData.Contact} onChange={handleChange} placeholder="e.g. 0712345678" className="form-input" required maxLength={10} />
+          <input type="text" name="contact" value={formData.contact} onChange={handleChange} placeholder="e.g. 0712345678" className="form-input" required maxLength={14} />
         </div>
       </div>
       <div className="form-actions">

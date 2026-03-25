@@ -44,12 +44,13 @@ router.get('/:id', async (req, res) => {
 // POST new grade
 router.post('/', async (req, res) => {
     try {
-        const { grade, pricePerLitre } = req.body;
+        const grade = String(req.body.grade ?? req.body.Grade ?? '').trim();
+        const pricePerLitre = Number(req.body.pricePerLitre ?? req.body.PricePerLitre);
 
         if (!['A', 'AA', 'B'].includes(grade)) {
             return res.status(400).json({ error: 'Grade must be A, AA, or B' });
         }
-        if (!pricePerLitre || pricePerLitre <= 0) {
+        if (!Number.isFinite(pricePerLitre) || pricePerLitre <= 0) {
             return res.status(400).json({ error: 'Price must be greater than 0' });
         }
 
@@ -74,7 +75,17 @@ router.post('/', async (req, res) => {
 // PUT update grade price
 router.put('/:id', async (req, res) => {
     try {
-        const { grade, pricePerLitre } = req.body;
+        const bodyGrade = req.body.grade ?? req.body.Grade;
+        const grade = bodyGrade ? String(bodyGrade).trim() : null;
+        const pricePerLitre = Number(req.body.pricePerLitre ?? req.body.PricePerLitre);
+
+        if (grade && !['A', 'AA', 'B'].includes(grade)) {
+            return res.status(400).json({ error: 'Grade must be A, AA, or B' });
+        }
+
+        if (!Number.isFinite(pricePerLitre) || pricePerLitre <= 0) {
+            return res.status(400).json({ error: 'Price must be greater than 0' });
+        }
 
         const pool = await getConnection();
         const result = await pool.request()
@@ -83,7 +94,7 @@ router.put('/:id', async (req, res) => {
             .input('pricePerLitre', sql.Decimal(10, 2), pricePerLitre)
             .query(`
                 UPDATE MilkQuality 
-                SET Grade = @grade,
+                SET Grade = COALESCE(@grade, Grade),
                     PricePerLitre = @pricePerLitre
                 WHERE QualityId = @id
             `);

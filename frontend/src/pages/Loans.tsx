@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { CreditCard, DollarSign, Clock, Users, Search, Plus, Edit3, Trash2 } from 'lucide-react';
+import { CreditCard, DollarSign, Clock, Search, Plus, Edit3, Trash2 } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
-import Modal from '../components/common/Modal';
 import LoanForm from '../components/forms/LoanForm';
 import '../styles/Transactions.css';
 
@@ -13,7 +12,7 @@ const Loans = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
+  const [, setEditItem] = useState<any>(null);
   const animated = useRef(false);
 
   const load = async () => {
@@ -90,8 +89,8 @@ const Loans = () => {
                       <td>{fmtDate(l.DateBorrowed)}</td>
                       <td>{fmt(monthly)}</td>
                       <td className="actions-cell">
-                        <button type='button' className="action-btn edit" onClick={() => { setEditItem(l); setFormOpen(true); }}><Edit3 size={14} /></button>
-                        <button type='button' className="action-btn delete" onClick={() => handleDelete(l.LoanId)}><Trash2 size={14} /></button>
+                        <button type='button' title="Edit loan" className="action-btn edit" onClick={() => { setEditItem(l); setFormOpen(true); }}><Edit3 size={14} /></button>
+                        <button type='button' title="Delete loan" className="action-btn delete" onClick={() => handleDelete(l.LoanId)}><Trash2 size={14} /></button>
                       </td>
                     </tr>
                   );
@@ -102,9 +101,11 @@ const Loans = () => {
         )}
       </div>
 
-      <Modal isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} title={editItem ? 'Edit Loan' : 'Add New Loan'}>
-        <LoanForm mode={editItem ? 'edit' : 'add'} initialData={editItem} onSuccess={() => { load(); setFormOpen(false); setEditItem(null); }} onClose={() => { setFormOpen(false); setEditItem(null); }} />
-      </Modal>
+      <LoanForm
+        isOpen={formOpen}
+        onSaved={() => { load(); setFormOpen(false); setEditItem(null); }}
+        onClose={() => { setFormOpen(false); setEditItem(null); }}
+      />
     </div>
   );
 };

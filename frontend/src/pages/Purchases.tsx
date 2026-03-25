@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ShoppingCart, DollarSign, Package, Users, Search, Plus, Edit3, Trash2 } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
-import Modal from '../components/common/Modal';
 import PurchaseForm from '../components/forms/PurchaseForm';
 import '../styles/Transactions.css';
 
@@ -13,11 +12,11 @@ const Purchases = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
+  const [, setEditItem] = useState<any>(null);
   const animated = useRef(false);
 
   const load = async () => {
-    try { const res = await fetch(`${API}/purchases`); const data = await res.json(); setPurchases(Array.isArray(data) ? data : data.recordset ?? []); }
+    try { const res = await fetch(`${API}/input-purchases`); const data = await res.json(); setPurchases(Array.isArray(data) ? data : data.recordset ?? []); }
     catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
@@ -48,7 +47,7 @@ const Purchases = () => {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this purchase?')) return;
-    try { await fetch(`${API}/purchases/${id}`, { method: 'DELETE' }); load(); } catch (err: any) { alert(err.message); }
+    try { await fetch(`${API}/input-purchases/${id}`, { method: 'DELETE' }); load(); } catch (err: any) { alert(err.message); }
   };
 
   if (loading) return <div className="page-loading"><div className="loading-spinner" /><p>Loading purchases...</p></div>;
@@ -87,8 +86,8 @@ const Purchases = () => {
                     <td className="amount-cell">{fmt(p.PurchaseAmount)}</td>
                     <td>{fmtDate(p.DateOfPurchase)}</td>
                     <td className="actions-cell">
-                      <button  type="button" className="action-btn edit" onClick={() => { setEditItem(p); setFormOpen(true); }}><Edit3 size={14} /></button>
-                      <button  type="button" className="action-btn delete" onClick={() => handleDelete(p.PurchaseId)}><Trash2 size={14} /></button>
+                      <button  type="button" title="Edit purchase" className="action-btn edit" onClick={() => { setEditItem(p); setFormOpen(true); }}><Edit3 size={14} /></button>
+                      <button  type="button" title="Delete purchase" className="action-btn delete" onClick={() => handleDelete(p.PurchaseId)}><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
@@ -98,9 +97,11 @@ const Purchases = () => {
         )}
       </div>
 
-      <Modal isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} title={editItem ? 'Edit Purchase' : 'Add New Purchase'}>
-        <PurchaseForm mode={editItem ? 'edit' : 'add'} initialData={editItem} onSuccess={() => { load(); setFormOpen(false); setEditItem(null); }} onClose={() => { setFormOpen(false); setEditItem(null); }} />
-      </Modal>
+      <PurchaseForm
+        isOpen={formOpen}
+        onSaved={() => { load(); setFormOpen(false); setEditItem(null); }}
+        onClose={() => { setFormOpen(false); setEditItem(null); }}
+      />
     </div>
   );
 };

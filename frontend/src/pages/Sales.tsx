@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { TrendingUp, DollarSign, Percent, Users, Search, Plus, Edit3, Trash2 } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
-import Modal from '../components/common/Modal';
 import SaleForm from '../components/forms/SaleForm';
 import '../styles/Transactions.css';
 
@@ -13,7 +12,7 @@ const Sales = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
+  const [, setEditItem] = useState<any>(null);
   const animated = useRef(false);
 
   const load = async () => {
@@ -86,8 +85,8 @@ const Sales = () => {
                     <td className="amount-cell">{fmt(s.SaleAmount)}</td>
                     <td className="commission-cell">{fmt(s.Commission)}</td>
                     <td className="actions-cell">
-                      <button type='button' className="action-btn edit" onClick={() => { setEditItem(s); setFormOpen(true); }}><Edit3 size={14} /></button>
-                      <button type='button' className="action-btn delete" onClick={() => handleDelete(s.SaleId)}><Trash2 size={14} /></button>
+                      <button type='button' title="Edit sale" className="action-btn edit" onClick={() => { setEditItem(s); setFormOpen(true); }}><Edit3 size={14} /></button>
+                      <button type='button' title="Delete sale" className="action-btn delete" onClick={() => handleDelete(s.SaleId)}><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
@@ -97,9 +96,11 @@ const Sales = () => {
         )}
       </div>
 
-      <Modal isOpen={formOpen} onClose={() => { setFormOpen(false); setEditItem(null); }} title={editItem ? 'Edit Sale' : 'Add New Sale'}>
-        <SaleForm mode={editItem ? 'edit' : 'add'} initialData={editItem} onSuccess={() => { load(); setFormOpen(false); setEditItem(null); }} onClose={() => { setFormOpen(false); setEditItem(null); }} />
-      </Modal>
+      <SaleForm
+        isOpen={formOpen}
+        onSaved={() => { load(); setFormOpen(false); setEditItem(null); }}
+        onClose={() => { setFormOpen(false); setEditItem(null); }}
+      />
     </div>
   );
 };

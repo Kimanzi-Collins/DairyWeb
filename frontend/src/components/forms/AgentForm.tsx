@@ -10,16 +10,16 @@ interface Props {
 }
 
 const AgentForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
-  const [formData, setFormData] = useState({ AgentName: '', Contact: '', Location: '' });
+  const [formData, setFormData] = useState({ agentName: '', contact: '', location: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
       setFormData({
-        AgentName: initialData.AgentName || '',
-        Contact: initialData.Contact || '',
-        Location: initialData.Location || '',
+        agentName: initialData.AgentName || '',
+        contact: initialData.Contact || '',
+        location: initialData.Location || '',
       });
     }
   }, [mode, initialData]);
@@ -49,15 +49,15 @@ const AgentForm = ({ mode, initialData, onSuccess, onClose }: Props) => {
       <div className="form-grid">
         <div className="form-group">
           <label className="form-label">AGENT NAME *</label>
-          <input type="text" name="AgentName" value={formData.AgentName} onChange={handleChange} placeholder="e.g. James Kariuki" className="form-input" required />
+          <input type="text" name="agentName" value={formData.agentName} onChange={handleChange} placeholder="e.g. James Kariuki" className="form-input" required />
         </div>
         <div className="form-group">
           <label className="form-label">CONTACT *</label>
-          <input type="text" name="Contact" value={formData.Contact} onChange={handleChange} placeholder="e.g. 0712345678" className="form-input" required />
+          <input type="text" name="contact" value={formData.contact} onChange={handleChange} placeholder="e.g. 0712345678" className="form-input" required />
         </div>
         <div className="form-group full-width">
           <label className="form-label">LOCATION *</label>
-          <input type="text" name="Location" value={formData.Location} onChange={handleChange} placeholder="e.g. Nairobi" className="form-input" required />
+          <input type="text" name="location" value={formData.location} onChange={handleChange} placeholder="e.g. Nairobi" className="form-input" required />
         </div>
       </div>
       <div className="form-actions">

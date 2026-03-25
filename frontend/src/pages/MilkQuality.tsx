@@ -48,7 +48,11 @@ const MilkQuality = () => {
     if (!editGrade) return;
     setSaving(true); setError('');
     try {
-      const res = await fetch(`${API}/milk-quality/${editGrade.QualityId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ PricePerLitre: Number(editPrice) }) });
+      const res = await fetch(`${API}/milk-quality/${editGrade.QualityId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grade: editGrade.Grade, pricePerLitre: Number(editPrice) })
+      });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed');
       load(); setShowModal(false); setEditGrade(null);
     } catch (err: any) { setError(err.message); }
