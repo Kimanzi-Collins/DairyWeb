@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { FileText, Droplet, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
+import { getEntityProfilePic } from '../utils/entityProfilePics';
 import '../styles/FactoryProfile.css';
 
 const API = 'http://localhost:3001/api';
@@ -31,21 +32,25 @@ const FactoryProfile = () => {
         const delRes = await fetch(`${API}/deliveries?factoryId=${id}`);
         if (delRes.ok) {
           const delData = await delRes.json();
-          const delList = Array.isArray(delData) ? delData : delData.recordset ?? [];
+          const fullList = Array.isArray(delData) ? delData : delData.recordset ?? [];
+          const delList = fullList.filter((delivery: any) =>
+            String(delivery.FactoryId || '').toUpperCase() === String(id || '').toUpperCase()
+          );
           setDeliveries(delList);
 
           // Build monthly breakdown
-          const monthly: Record<string, { month: string; deliveries: number; totalLitres: number; totalAmount: number }> = {};
+          const monthly: Record<string, { month: string; sortKey: string; deliveries: number; totalLitres: number; totalAmount: number }> = {};
           delList.forEach((d: any) => {
-            const date = new Date(d.DeliveryDate || d.Date || d.DateDelivered);
+            const date = new Date(d.DeliveryDate || d.Date || d.DateDelivered || d.CreatedAt);
+            if (Number.isNaN(date.getTime())) return;
             const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             const label = date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
-            if (!monthly[key]) monthly[key] = { month: label, deliveries: 0, totalLitres: 0, totalAmount: 0 };
+            if (!monthly[key]) monthly[key] = { month: label, sortKey: key, deliveries: 0, totalLitres: 0, totalAmount: 0 };
             monthly[key].deliveries += 1;
-            monthly[key].totalLitres += Number(d.Litres || d.Quantity || 0);
+            monthly[key].totalLitres += Number(d.MilkQuantity || d.Litres || d.Quantity || 0);
             monthly[key].totalAmount += Number(d.Amount || d.TotalAmount || 0);
           });
-          setMonthlyData(Object.values(monthly).sort((a, b) => a.month.localeCompare(b.month)));
+          setMonthlyData(Object.values(monthly).sort((a, b) => a.sortKey.localeCompare(b.sortKey)));
         }
       } catch { console.log('Delivery data not available'); }
     } catch (err) { console.error('Failed to load factory:', err); }
@@ -77,9 +82,10 @@ const FactoryProfile = () => {
   };
 
   const totalDeliveries = deliveries.length;
-  const totalLitres = deliveries.reduce((s, d) => s + Number(d.Litres || d.Quantity || 0), 0);
+  const totalLitres = deliveries.reduce((s, d) => s + Number(d.MilkQuantity || d.Litres || d.Quantity || 0), 0);
   const totalAmount = deliveries.reduce((s, d) => s + Number(d.Amount || d.TotalAmount || 0), 0);
   const avgLitres = totalDeliveries > 0 ? totalLitres / totalDeliveries : 0;
+  const factoryProfilePic = factory?.FactoryId ? getEntityProfilePic('factories', factory.FactoryId) : null;
 
   const customTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null;
@@ -102,9 +108,13 @@ const FactoryProfile = () => {
 
       <div className="factory-profile-card">
         <div className="factory-profile-card-left">
-          <div className="factory-profile-avatar" style={{ background: getAvatarColor(factory.FactoryId) }}>
-            {getInitials(factory.FactoryName)}
-          </div>
+          {factoryProfilePic ? (
+            <img className="factory-profile-avatar" src={factoryProfilePic} alt={factory.FactoryName} style={{ objectFit: 'cover' }} />
+          ) : (
+            <div className="factory-profile-avatar" style={{ background: getAvatarColor(factory.FactoryId) }}>
+              {getInitials(factory.FactoryName)}
+            </div>
+          )}
           <div className="factory-profile-info">
             <div className="factory-profile-badges">
               <span className="badge badge-blue">{factory.FactoryId}</span>

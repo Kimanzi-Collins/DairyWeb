@@ -1,15 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { Building2, MapPin, FileText, Activity, Phone, Search, Plus, Edit3, Trash2 } from 'lucide-react';
+import { Building2, MapPin, FileText, Activity, Phone, Search, Plus, Edit3, Trash2, Pencil } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
 import Modal from '../components/common/Modal';
 import FactoryForm from '../components/forms/FactoryForm';
+import { fileToDataUrl, getEntityProfilePic, setEntityProfilePic } from '../utils/entityProfilePics';
 import '../styles/Factories.css';
 
 const API = 'http://localhost:3001/api';
 
 interface Factory { FactoryId: string; FactoryName: string; Location: string; Contact: string; }
+
+interface Delivery {
+  DeliveryId: string;
+  MilkQuantity: number;
+  Amount: number;
+}
 
 const Factories = () => {
   const [factories, setFactories] = useState<Factory[]>([]);
@@ -17,6 +24,10 @@ const Factories = () => {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editFactory, setEditFactory] = useState<Factory | null>(null);
+  const [uploadFactory, setUploadFactory] = useState<Factory | null>(null);
+  const [avatarVersion, setAvatarVersion] = useState(0);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const animated = useRef(false);
   const navigate = useNavigate();
 
@@ -25,6 +36,12 @@ const Factories = () => {
       const res = await fetch(`${API}/factories`);
       const data = await res.json();
       setFactories(Array.isArray(data) ? data : data.recordset ?? []);
+
+      const deliveriesRes = await fetch(`${API}/deliveries`);
+      if (deliveriesRes.ok) {
+        const deliveriesData = await deliveriesRes.json();
+        setDeliveries(Array.isArray(deliveriesData) ? deliveriesData : deliveriesData.recordset ?? []);
+      }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -50,6 +67,12 @@ const Factories = () => {
   const grouped = filtered.reduce((acc, f) => { const loc = f.Location || 'Unknown'; if (!acc[loc]) acc[loc] = []; acc[loc].push(f); return acc; }, {} as Record<string, Factory[]>);
   const locations = Object.keys(grouped).sort();
   const uniqueLocs = [...new Set(factories.map(f => f.Location))].length;
+  const totalDeliveries = deliveries.length;
+  const totalLitres = deliveries.reduce((sum, delivery) => sum + Number(delivery.MilkQuantity || 0), 0);
+  const totalAmount = deliveries.reduce((sum, delivery) => sum + Number(delivery.Amount || 0), 0);
+
+  const formatCurrency = (value: number) =>
+    `Ksh. ${value.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const getInitials = (n: string) => n?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
   const getColor = (id: string) => { const c = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4']; return c[id.split('').reduce((s, ch) => s + ch.charCodeAt(0), 0) % c.length]; };
@@ -57,6 +80,27 @@ const Factories = () => {
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Delete factory "${name}"?`)) return;
     try { await fetch(`${API}/factories/${id}`, { method: 'DELETE' }); load(); } catch (err: any) { alert(err.message); }
+  };
+
+  const handleEditPic = (factory: Factory) => {
+    setUploadFactory(factory);
+    fileInputRef.current?.click();
+  };
+
+  const handleFactoryPicSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !uploadFactory) return;
+
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setEntityProfilePic('factories', uploadFactory.FactoryId, dataUrl);
+      setAvatarVersion((v) => v + 1);
+    } catch (err) {
+      console.error('Factory picture update failed', err);
+    } finally {
+      event.target.value = '';
+      setUploadFactory(null);
+    }
   };
 
   if (loading) return <div className="page-loading"><div className="loading-spinner" /><p>Loading factories...</p></div>;
@@ -71,8 +115,8 @@ const Factories = () => {
       <div className="factories-stats">
         <StatCard icon={Building2} title="TOTAL FACTORIES" value={factories.length} subtitle={`${uniqueLocs} location${uniqueLocs !== 1 ? 's' : ''}`} color="#3b82f6" />
         <StatCard icon={MapPin} title="LOCATIONS" value={uniqueLocs} subtitle="factory locations" color="#8b5cf6" />
-        <StatCard icon={FileText} title="DELIVERIES" value="—" subtitle="total received" color="#10b981" />
-        <StatCard icon={Activity} title="STATUS" value="Active" subtitle="all factories" color="#f59e0b" />
+        <StatCard icon={FileText} title="DELIVERIES" value={totalDeliveries} subtitle={`${totalLitres.toLocaleString('en-KE', { maximumFractionDigits: 2 })} L`} color="#10b981" />
+        <StatCard icon={Activity} title="TOTAL AMOUNT" value={formatCurrency(totalAmount)} subtitle="across all factories" color="#f59e0b" />
       </div>
 
       <div className="factories-search-section">
@@ -89,8 +133,25 @@ const Factories = () => {
             {grouped[loc].map(f => (
               <div key={f.FactoryId} className="factory-card">
                 <div className="factory-card-header">
-                  <div className="factory-card-identity"><div className="factory-avatar" style={{ background: getColor(f.FactoryId) }}>{getInitials(f.FactoryName)}</div><div><h4 className="factory-name">{f.FactoryName}</h4><span className="factory-id">{f.FactoryId}</span></div></div>
-                  <div className="factory-card-actions"><button className="action-btn edit" onClick={() => { setEditFactory(f); setFormOpen(true); }}><Edit3 size={15} /></button><button className="action-btn delete" onClick={() => handleDelete(f.FactoryId, f.FactoryName)}><Trash2 size={15} /></button></div>
+                  <div className="factory-card-identity">
+                    {getEntityProfilePic('factories', f.FactoryId) ? (
+                      <img
+                        key={`${f.FactoryId}-${avatarVersion}`}
+                        src={getEntityProfilePic('factories', f.FactoryId) || ''}
+                        alt={f.FactoryName}
+                        className="factory-avatar"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div className="factory-avatar" style={{ background: getColor(f.FactoryId) }}>{getInitials(f.FactoryName)}</div>
+                    )}
+                    <div><h4 className="factory-name">{f.FactoryName}</h4><span className="factory-id">{f.FactoryId}</span></div>
+                  </div>
+                  <div className="factory-card-actions">
+                    <button className="action-btn edit" onClick={() => handleEditPic(f)} title="Edit profile picture"><Pencil size={15} /></button>
+                    <button className="action-btn edit" title="Edit factory" onClick={() => { setEditFactory(f); setFormOpen(true); }}><Edit3 size={15} /></button>
+                    <button className="action-btn delete" title="Delete factory" onClick={() => handleDelete(f.FactoryId, f.FactoryName)}><Trash2 size={15} /></button>
+                  </div>
                 </div>
                 <div className="factory-card-details">
                   <div className="detail-row"><Phone size={14} /><span>{f.Contact}</span></div>
@@ -102,6 +163,14 @@ const Factories = () => {
           </div>
         </div>
       ))}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden-upload-input"
+        onChange={handleFactoryPicSelected}
+      />
 
       <Modal isOpen={formOpen} onClose={() => { setFormOpen(false); setEditFactory(null); }} title={editFactory ? 'Edit Factory' : 'Add New Factory'}>
         <FactoryForm mode={editFactory ? 'edit' : 'add'} initialData={editFactory} onSuccess={() => { load(); setFormOpen(false); setEditFactory(null); }} onClose={() => { setFormOpen(false); setEditFactory(null); }} />

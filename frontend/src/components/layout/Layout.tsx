@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Sidebar from './Sidebar';
@@ -12,13 +12,28 @@ export default function Layout() {
     const location = useLocation();
     const [collapsed, setCollapsed] = useState(false);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
+        if (!contentRef.current) return;
+
+        gsap.killTweensOf(contentRef.current);
+        gsap.set(contentRef.current, {
+            autoAlpha: 1,
+            y: 0,
+            filter: 'none',
+        });
+
         const ctx = gsap.context(() => {
-            // Liquid page transition with blur
-            gsap.fromTo(contentRef.current,
-                { opacity: 0, y: 20, filter: 'blur(8px)' },
-                { opacity: 1, y: 0, filter: 'blur(0px)',
-                  duration: 0.7, ease: 'expo.out' }
+            gsap.fromTo(
+                contentRef.current,
+                { autoAlpha: 0.001, y: 12, filter: 'blur(6px)' },
+                {
+                    autoAlpha: 1,
+                    y: 0,
+                    filter: 'blur(0px)',
+                    duration: 0.65,
+                    ease: 'power3.out',
+                    clearProps: 'filter,transform,opacity,visibility',
+                }
             );
         });
         setTimeout(() => ScrollTrigger.refresh(), 200);
@@ -63,9 +78,10 @@ const styles: Record<string, React.CSSProperties> = {
         backgroundImage: `url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=2074&auto=format&fit=crop')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        opacity: 0.05,
-        filter: 'grayscale(80%)',
+        opacity: 'var(--bg-image-opacity)',
+        filter: 'grayscale(var(--bg-grayscale))',
         zIndex: 0,
+        pointerEvents: 'none',
     },
     gradientOverlay: {
         position: 'fixed',
@@ -76,7 +92,9 @@ const styles: Record<string, React.CSSProperties> = {
             radial-gradient(ellipse at 100% 100%, rgba(74, 222, 128, 0.05) 0%, transparent 50%),
             radial-gradient(ellipse at 50% 50%, rgba(45, 212, 191, 0.03) 0%, transparent 60%)
         `,
+        opacity: 'var(--layout-overlay-opacity)',
         zIndex: 0,
+        pointerEvents: 'none',
     },
     main: {
         flex: 1,
@@ -89,5 +107,7 @@ const styles: Record<string, React.CSSProperties> = {
     content: {
         padding: '28px 32px',
         flex: 1,
+        position: 'relative',
+        zIndex: 1,
     },
 };

@@ -62,12 +62,12 @@ const ChartTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null;
     return (
         <div style={{
-            background: 'rgba(13,17,23,0.92)',
+            background: 'var(--base-200)',
             backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            border: '1px solid var(--glass-border)',
             borderRadius: 12, padding: '12px 16px',
         }}>
-            <p style={{ color: '#8b949e', fontSize: 11, marginBottom: 6 }}>{label}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, marginBottom: 6 }}>{label}</p>
             {payload.map((p: any, i: number) => (
                 <p key={i} style={{ color: p.color, fontSize: 13, fontWeight: 600 }}>
                     {p.name}: {formatCurrency(p.value)}
@@ -150,7 +150,7 @@ export default function FarmerProfile() {
                     transition: 'color 0.2s ease',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary)')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#8b949e')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
             >
                 <ArrowLeft size={18} /> Back to Farmers
             </div>
@@ -220,9 +220,9 @@ export default function FarmerProfile() {
                     <GlassCard key={s.label} delay={0.1 + i * 0.08} scrollReveal>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                             <s.icon size={18} color={s.color} />
-                            <span style={{ fontSize: 11, color: '#8b949e', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>{s.label}</span>
+                            <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 700 }}>{s.label}</span>
                         </div>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: '#e6edf3' }}>{s.value}</div>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-bright)' }}>{s.value}</div>
                     </GlassCard>
                 ))}
             </div>
@@ -231,18 +231,18 @@ export default function FarmerProfile() {
             <div className="p-section" style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
                 {/* Bar Chart */}
                 <GlassCard scrollReveal delay={0.2} style={{ flex: 2 }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: '#e6edf3', marginBottom: 2 }}>Monthly Breakdown</h3>
-                    <p style={{ fontSize: 12, color: '#484f58', marginBottom: 16 }}>Earnings vs deductions over time</p>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-bright)', marginBottom: 2 }}>Monthly Breakdown</h3>
+                    <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 16 }}>Earnings vs deductions over time</p>
                     <div style={{ height: 250 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={chartData}>
-                                <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
+                                <CartesianGrid vertical={false} stroke="var(--glass-border)" />
                                 <XAxis dataKey="month" axisLine={false} tickLine={false}
-                                    tick={{ fill: '#8b949e', fontSize: 11 }} dy={8} />
+                                    tick={{ fill: 'var(--text-muted)', fontSize: 11 }} dy={8} />
                                 <YAxis axisLine={false} tickLine={false}
-                                    tick={{ fill: '#484f58', fontSize: 10 }} width={55}
+                                    tick={{ fill: 'var(--text-faint)', fontSize: 10 }} width={55}
                                     tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
-                                <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                                <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(16, 32, 51, 0.04)' }} />
                                 <Bar dataKey="earnings" name="Earnings" fill="#8b7cf6" radius={[4, 4, 0, 0]} maxBarSize={28} />
                                 <Bar dataKey="deductions" name="Deductions" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={28} />
                             </BarChart>
@@ -252,8 +252,8 @@ export default function FarmerProfile() {
 
                 {/* Performance */}
                 <GlassCard scrollReveal delay={0.3} style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: '#e6edf3', marginBottom: 2 }}>Performance</h3>
-                    <p style={{ fontSize: 12, color: '#484f58', marginBottom: 16 }}>Key indicators</p>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-bright)', marginBottom: 2 }}>Performance</h3>
+                    <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 16 }}>Key indicators</p>
                     {[
                         { label: 'Best Month', value: formatCurrency(profile.BestMonthEarning), color: 'var(--secondary)' },
                         { label: 'Worst Month', value: formatCurrency(profile.WorstMonthEarning), color: 'var(--error)' },
@@ -265,9 +265,9 @@ export default function FarmerProfile() {
                         <div key={item.label} style={{
                             display: 'flex', justifyContent: 'space-between',
                             padding: '10px 0',
-                            borderBottom: '1px solid rgba(255,255,255,0.04)',
+                            borderBottom: '1px solid var(--glass-border)',
                         }}>
-                            <span style={{ fontSize: 12, color: '#8b949e' }}>{item.label}</span>
+                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{item.label}</span>
                             <span style={{ fontSize: 13, fontWeight: 700, color: item.color }}>{item.value}</span>
                         </div>
                     ))}
@@ -278,8 +278,8 @@ export default function FarmerProfile() {
             <GlassCard scrollReveal delay={0.3} className="p-section">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <div>
-                        <h3 style={{ fontSize: 15, fontWeight: 700, color: '#e6edf3', marginBottom: 2 }}>Monthly Statements</h3>
-                        <p style={{ fontSize: 12, color: '#484f58' }}>Complete financial breakdown</p>
+                        <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-bright)', marginBottom: 2 }}>Monthly Statements</h3>
+                        <p style={{ fontSize: 12, color: 'var(--text-faint)' }}>Complete financial breakdown</p>
                     </div>
                     <TrendingUp size={18} color="var(--primary)" />
                 </div>
@@ -291,9 +291,9 @@ export default function FarmerProfile() {
                                 {['Month', 'Deliveries', 'Commission', 'Loan', 'Inputs', 'Deductions', 'Net Payment', 'Status'].map(h => (
                                     <th key={h} style={{
                                         textAlign: 'left', padding: '10px 12px',
-                                        fontSize: 10, fontWeight: 700, color: '#484f58',
+                                        fontSize: 10, fontWeight: 700, color: 'var(--text-faint)',
                                         textTransform: 'uppercase', letterSpacing: 1,
-                                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                        borderBottom: '1px solid var(--glass-border)',
                                     }}>{h}</th>
                                 ))}
                             </tr>
@@ -301,8 +301,8 @@ export default function FarmerProfile() {
                         <tbody>
                             {monthly.map((m, i) => (
                                 <tr key={i}
-                                    style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                                    style={{ borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s' }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(16, 32, 51, 0.04)')}
                                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                                 >
                                     <td style={td}><span style={{ fontWeight: 600 }}>{m.MonthDisplay}</span></td>
@@ -329,14 +329,14 @@ export default function FarmerProfile() {
 const td: React.CSSProperties = {
     padding: '12px',
     fontSize: '13px',
-    color: '#c9d1d9',
+    color: 'var(--text-normal)',
 };
 
 const S: Record<string, React.CSSProperties> = {
     profileHeader: {
-        background: 'rgba(22, 27, 34, 0.65)',
+        background: 'var(--glass-bg-card)',
         backdropFilter: 'blur(16px) saturate(160%)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid var(--glass-border)',
         borderRadius: '16px',
         padding: '32px',
         marginBottom: 20,
@@ -393,7 +393,7 @@ const S: Record<string, React.CSSProperties> = {
     profileName: {
         fontSize: '26px',
         fontWeight: 800,
-        color: '#f0f6fc',
+        color: 'var(--text-bright)',
         marginBottom: '10px',
         letterSpacing: '-0.3px',
     },
@@ -407,20 +407,20 @@ const S: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         gap: '5px',
         fontSize: '13px',
-        color: '#8b949e',
+        color: 'var(--text-muted)',
     },
     earningsBox: {
         textAlign: 'right',
         flexShrink: 0,
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.05)',
+        background: 'var(--base-200)',
+        border: '1px solid var(--glass-border)',
         borderRadius: '14px',
         padding: '20px 24px',
     },
     earningsLabel: {
         fontSize: '10px',
         fontWeight: 700,
-        color: '#484f58',
+        color: 'var(--text-faint)',
         letterSpacing: '1.5px',
         marginBottom: '8px',
     },
@@ -432,6 +432,6 @@ const S: Record<string, React.CSSProperties> = {
     },
     earningsSub: {
         fontSize: '11px',
-        color: '#484f58',
+        color: 'var(--text-faint)',
     },
 };

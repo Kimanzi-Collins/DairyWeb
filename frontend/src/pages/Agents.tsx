@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
-import { Users, MapPin, DollarSign, Briefcase, Phone, Search, UserPlus, Edit3, Trash2 } from 'lucide-react';
+import { Users, MapPin, DollarSign, Briefcase, Phone, Search, UserPlus, Edit3, Trash2, Pencil } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
 import Modal from '../components/common/Modal';
 import AgentForm from '../components/forms/AgentForm';
+import { fileToDataUrl, getEntityProfilePic, setEntityProfilePic } from '../utils/entityProfilePics';
 import '../styles/Agents.css';
 
 const API = 'http://localhost:3001/api';
@@ -16,12 +17,23 @@ interface Agent {
   Location: string;
 }
 
+interface Sale {
+  SaleId: string;
+  AgentId: string;
+  SaleAmount: number;
+  Commission: number;
+}
+
 const Agents = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editAgent, setEditAgent] = useState<Agent | null>(null);
+  const [uploadAgent, setUploadAgent] = useState<Agent | null>(null);
+  const [avatarVersion, setAvatarVersion] = useState(0);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const animated = useRef(false);
   const navigate = useNavigate();
 
@@ -30,6 +42,12 @@ const Agents = () => {
       const res = await fetch(`${API}/agents`);
       const data = await res.json();
       setAgents(Array.isArray(data) ? data : data.recordset ?? []);
+
+      const salesRes = await fetch(`${API}/sales`);
+      if (salesRes.ok) {
+        const salesData = await salesRes.json();
+        setSales(Array.isArray(salesData) ? salesData : salesData.recordset ?? []);
+      }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -73,6 +91,12 @@ const Agents = () => {
 
   const locations = Object.keys(grouped).sort();
   const uniqueLocations = [...new Set(agents.map(a => a.Location))].length;
+  const totalCommission = sales.reduce((sum, sale) => sum + Number(sale.Commission || 0), 0);
+  const totalSalesAmount = sales.reduce((sum, sale) => sum + Number(sale.SaleAmount || 0), 0);
+  const totalSalesCount = sales.length;
+
+  const formatCurrency = (value: number) =>
+    `Ksh. ${value.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const getInitials = (n: string) => n?.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '??';
   const getColor = (id: string) => {
@@ -88,6 +112,27 @@ const Agents = () => {
     } catch (err: any) { alert(err.message); }
   };
 
+  const handleEditPic = (agent: Agent) => {
+    setUploadAgent(agent);
+    fileInputRef.current?.click();
+  };
+
+  const handleAgentPicSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !uploadAgent) return;
+
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setEntityProfilePic('agents', uploadAgent.AgentId, dataUrl);
+      setAvatarVersion((v) => v + 1);
+    } catch (err) {
+      console.error('Agent picture update failed', err);
+    } finally {
+      event.target.value = '';
+      setUploadAgent(null);
+    }
+  };
+
   if (loading) return <div className="page-loading"><div className="loading-spinner" /><p>Loading agents...</p></div>;
 
   return (
@@ -100,8 +145,8 @@ const Agents = () => {
       <div className="agents-stats">
         <StatCard icon={Users} title="TOTAL AGENTS" value={agents.length} subtitle={`${uniqueLocations} location${uniqueLocations !== 1 ? 's' : ''}`} color="#8b5cf6" />
         <StatCard icon={MapPin} title="LOCATIONS" value={uniqueLocations} subtitle="coverage areas" color="#3b82f6" />
-        <StatCard icon={DollarSign} title="TOTAL COMMISSION" value="—" subtitle="no sales yet" color="#10b981" />
-        <StatCard icon={Briefcase} title="TOTAL SALES" value={0} subtitle="no sales yet" color="#f59e0b" />
+        <StatCard icon={DollarSign} title="TOTAL COMMISSION" value={formatCurrency(totalCommission)} subtitle={`${totalSalesCount} sales`} color="#10b981" />
+        <StatCard icon={Briefcase} title="TOTAL SALES" value={formatCurrency(totalSalesAmount)} subtitle="across all agents" color="#f59e0b" />
       </div>
 
       <div className="agents-search-section">
@@ -135,10 +180,21 @@ const Agents = () => {
               <div key={agent.AgentId} className="agent-card">
                 <div className="agent-card-header">
                   <div className="agent-card-identity">
-                    <div className="agent-avatar" style={{ background: getColor(agent.AgentId) }}>{getInitials(agent.AgentName)}</div>
+                    {getEntityProfilePic('agents', agent.AgentId) ? (
+                      <img
+                        key={`${agent.AgentId}-${avatarVersion}`}
+                        src={getEntityProfilePic('agents', agent.AgentId) || ''}
+                        alt={agent.AgentName}
+                        className="agent-avatar"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <div className="agent-avatar" style={{ background: getColor(agent.AgentId) }}>{getInitials(agent.AgentName)}</div>
+                    )}
                     <div><h4 className="agent-name">{agent.AgentName}</h4><span className="agent-id">{agent.AgentId}</span></div>
                   </div>
                   <div className="agent-card-actions">
+                    <button type="button" title="Edit profile picture" className="action-btn edit" onClick={() => handleEditPic(agent)}><Pencil size={15} /></button>
                     <button type="button" title="Edit agent" className="action-btn edit" onClick={() => { setEditAgent(agent); setFormOpen(true); }}><Edit3 size={15} /></button>
                     <button type="button" title="Delete agent" className="action-btn delete" onClick={() => handleDelete(agent.AgentId, agent.AgentName)}><Trash2 size={15} /></button>
                   </div>
@@ -153,6 +209,14 @@ const Agents = () => {
           </div>
         </div>
       ))}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden-upload-input"
+        onChange={handleAgentPicSelected}
+      />
 
       <Modal isOpen={formOpen} onClose={() => { setFormOpen(false); setEditAgent(null); }} title={editAgent ? 'Edit Agent' : 'Add New Agent'}>
         <AgentForm mode={editAgent ? 'edit' : 'add'} initialData={editAgent} onSuccess={() => { load(); setFormOpen(false); setEditAgent(null); }} onClose={() => { setFormOpen(false); setEditAgent(null); }} />

@@ -143,7 +143,7 @@ function NavSection({ label, items, collapsed, location }: {
                             marginBottom: '2px',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
-                            background: isActive ? 'rgba(139, 124, 246, 0.1)' : 'transparent',
+                            background: isActive ? 'var(--sidebar-active-bg)' : 'transparent',
                             borderLeft: isActive && !collapsed
                                 ? '3px solid var(--primary)' : '3px solid transparent',
                             transition: 'all 0.25s ease',
@@ -151,13 +151,13 @@ function NavSection({ label, items, collapsed, location }: {
                     >
                         <item.icon
                             size={18}
-                            color={isActive ? 'var(--primary)' : '#7d8590'}
+                            color={isActive ? 'var(--primary)' : 'var(--text-muted)'}
                             style={{ flexShrink: 0 }}
                         />
                         {!collapsed && (
                             <>
                                 <span style={{
-                                    color: isActive ? '#e6edf3' : '#9da5ae',
+                                    color: isActive ? 'var(--text-bright)' : 'var(--text-muted)',
                                 }}>{item.label}</span>
                                 {isActive && (
                                     <ChevronRight size={14} color="var(--primary)"
@@ -175,7 +175,7 @@ function NavSection({ label, items, collapsed, location }: {
 const S: Record<string, React.CSSProperties> = {
     sidebar: {
         height: '100vh',
-        background: 'rgba(13, 17, 23, 0.75)',
+        background: 'var(--sidebar-bg)',
         backdropFilter: 'blur(24px) saturate(180%)',
         WebkitBackdropFilter: 'blur(24px) saturate(180%)',
         position: 'fixed',
@@ -183,7 +183,7 @@ const S: Record<string, React.CSSProperties> = {
         zIndex: 100,
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid rgba(255,255,255,0.05)',
+        borderRight: '1px solid var(--sidebar-border)',
         overflow: 'hidden',
         transition: 'width 0.35s cubic-bezier(0.23, 1, 0.32, 1)',
     },
@@ -196,8 +196,8 @@ const S: Record<string, React.CSSProperties> = {
     logoIcon: {
         width: '36px', height: '36px',
         borderRadius: '10px',
-        background: 'rgba(139, 124, 246, 0.1)',
-        border: '1px solid rgba(139, 124, 246, 0.15)',
+        background: 'var(--sidebar-logo-bg)',
+        border: '1px solid var(--sidebar-logo-border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -206,7 +206,7 @@ const S: Record<string, React.CSSProperties> = {
     logoText: {
         fontSize: '17px',
         fontWeight: 800,
-        color: '#e6edf3',
+        color: 'var(--text-bright)',
         lineHeight: 1.1,
         whiteSpace: 'nowrap',
     },
@@ -225,8 +225,8 @@ const S: Record<string, React.CSSProperties> = {
     toggleBox: {
         width: '30px', height: '30px',
         borderRadius: '8px',
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: 'var(--base-200)',
+        border: '1px solid var(--glass-border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -240,22 +240,22 @@ const S: Record<string, React.CSSProperties> = {
     navLabel: {
         fontSize: '10px',
         fontWeight: 700,
-        color: 'rgba(255,255,255,0.18)',
+        color: 'var(--text-faint)',
         letterSpacing: '1.5px',
         padding: '10px 14px 6px',
         whiteSpace: 'nowrap',
     },
     divider: {
         height: '1px',
-        background: 'rgba(255,255,255,0.05)',
+        background: 'var(--sidebar-border)',
         margin: '8px 12px',
     },
     bottom: {
         margin: '8px 10px 14px',
         padding: '12px 14px',
-        background: 'rgba(255,255,255,0.03)',
+        background: 'var(--base-200)',
         borderRadius: '10px',
-        border: '1px solid rgba(255,255,255,0.05)',
+        border: '1px solid var(--glass-border)',
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
@@ -263,12 +263,12 @@ const S: Record<string, React.CSSProperties> = {
     bottomName: {
         fontSize: '11px',
         fontWeight: 600,
-        color: 'rgba(255,255,255,0.55)',
+        color: 'var(--text-normal)',
         whiteSpace: 'nowrap',
     },
     bottomSub: {
         fontSize: '10px',
-        color: 'rgba(255,255,255,0.2)',
+        color: 'var(--text-faint)',
         whiteSpace: 'nowrap',
     },
     dot: {

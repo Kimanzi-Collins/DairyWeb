@@ -4,6 +4,7 @@ import { gsap } from 'gsap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Wallet, DollarSign, TrendingUp } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
+import { getEntityProfilePic } from '../utils/entityProfilePics';
 import '../styles/AgentProfile.css';
 
 const API = 'http://localhost:3001/api';
@@ -84,6 +85,7 @@ const AgentProfile = () => {
   const totalSalesAmount = sales.reduce((sum, s) => sum + Number(s.SaleAmount || s.Amount || 0), 0);
   const totalCommission = sales.reduce((sum, s) => sum + Number(s.Commission || s.CommissionAmount || 0), 0);
   const avgCommission = totalSalesCount > 0 ? totalCommission / totalSalesCount : 0;
+  const agentProfilePic = agent?.AgentId ? getEntityProfilePic('agents', agent.AgentId) : null;
 
   const customTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload) return null;
@@ -107,9 +109,13 @@ const AgentProfile = () => {
       {/* Profile Card */}
       <div className="agent-profile-card">
         <div className="agent-profile-card-left">
-          <div className="agent-profile-avatar" style={{ background: getAvatarColor(agent.AgentId) }}>
-            {getInitials(agent.AgentName)}
-          </div>
+          {agentProfilePic ? (
+            <img className="agent-profile-avatar" src={agentProfilePic} alt={agent.AgentName} style={{ objectFit: 'cover' }} />
+          ) : (
+            <div className="agent-profile-avatar" style={{ background: getAvatarColor(agent.AgentId) }}>
+              {getInitials(agent.AgentName)}
+            </div>
+          )}
           <div className="agent-profile-info">
             <div className="agent-profile-badges">
               <span className="badge badge-purple">{agent.AgentId}</span>

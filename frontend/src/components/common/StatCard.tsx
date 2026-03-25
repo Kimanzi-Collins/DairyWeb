@@ -80,9 +80,9 @@ export default function StatCard({ title, value, subtitle, icon: Icon, color, de
 
 const S: Record<string, React.CSSProperties> = {
     card: {
-        background: 'rgba(22, 27, 34, 0.55)',
+        background: 'var(--glass-bg-card)',
         backdropFilter: 'blur(12px) saturate(160%)',
-        border: '1px solid rgba(255,255,255,0.05)',
+        border: '1px solid var(--glass-border)',
         borderRadius: '16px',
         padding: '22px 24px',
         position: 'relative',
@@ -99,7 +99,7 @@ const S: Record<string, React.CSSProperties> = {
     title: {
         fontSize: '11px',
         fontWeight: 700,
-        color: '#8b949e',
+        color: 'var(--text-muted)',
         textTransform: 'uppercase' as const,
         letterSpacing: '0.8px',
         marginBottom: '6px',
@@ -107,12 +107,12 @@ const S: Record<string, React.CSSProperties> = {
     value: {
         fontSize: '26px',
         fontWeight: 800,
-        color: '#e6edf3',
+        color: 'var(--text-bright)',
         lineHeight: 1.1,
     },
     sub: {
         fontSize: '12px',
-        color: '#484f58',
+        color: 'var(--text-faint)',
         marginTop: '6px',
     },
 };

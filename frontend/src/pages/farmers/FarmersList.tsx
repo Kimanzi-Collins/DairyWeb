@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Users, UserPlus, MapPin, Search } from 'lucide-react';
@@ -17,6 +17,8 @@ export default function FarmersList() {
     const [loading, setLoading] = useState(true);
     const [formOpen, setFormOpen] = useState(false);
     const [editFarmer, setEditFarmer] = useState<Farmer | null>(null);
+    const [uploadFarmer, setUploadFarmer] = useState<Farmer | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => { load(); }, []);
 
@@ -27,6 +29,27 @@ export default function FarmersList() {
             setLoading(false);
             setTimeout(() => ScrollTrigger.refresh(), 200);
         } catch { setLoading(false); }
+    };
+
+    const handleEditProfilePic = (farmer: Farmer) => {
+        setUploadFarmer(farmer);
+        fileInputRef.current?.click();
+    };
+
+    const handleProfilePicSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !uploadFarmer) return;
+
+        try {
+            await farmersAPI.uploadProfilePic(uploadFarmer.FarmerId, file);
+            await load();
+            setTimeout(() => ScrollTrigger.refresh(), 250);
+        } catch (err) {
+            console.error('Profile pic upload failed', err);
+        } finally {
+            event.target.value = '';
+            setUploadFarmer(null);
+        }
     };
 
     const filtered = farmers.filter(f =>
@@ -115,11 +138,24 @@ export default function FarmersList() {
                         {grouped[loc]
                             .sort((a, b) => b.FarmerId.localeCompare(a.FarmerId))
                             .map((farmer, i) => (
-                                <FarmerCard key={farmer.FarmerId} farmer={farmer} index={i} />
+                                <FarmerCard
+                                    key={farmer.FarmerId}
+                                    farmer={farmer}
+                                    index={i}
+                                    onEditProfilePic={handleEditProfilePic}
+                                />
                             ))}
                     </div>
                 </div>
             ))}
+
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleProfilePicSelected}
+            />
             {/* Farmer Form Modal */}
             <FarmerForm
                 isOpen={formOpen}

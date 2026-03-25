@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import gsap from 'gsap';
-import { Bell, Search, Sparkles } from 'lucide-react';
+import { Bell, Search, Sparkles, Sun, Moon } from 'lucide-react';
 
 const titles: Record<string, string> = {
     '/': 'Dashboard',
@@ -27,23 +27,48 @@ export default function Header() {
     const titleRef = useRef<HTMLHeadingElement>(null);
     const location = useLocation();
     const title = titles[location.pathname] || 'DairySphere';
+    const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+        const stored = localStorage.getItem('dairyweb_theme');
+        return stored === 'light' ? 'light' : 'dark';
+    });
 
     useEffect(() => {
-        gsap.fromTo(titleRef.current,
-            { y: 12, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('dairyweb_theme', theme);
+    }, [theme]);
+
+    useLayoutEffect(() => {
+        if (!titleRef.current) return;
+        const tween = gsap.fromTo(titleRef.current,
+            { y: 10, autoAlpha: 0.001 },
+            { y: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out', clearProps: 'opacity,visibility,transform' }
         );
+        return () => {
+            tween.kill();
+        };
     }, [location.pathname]);
 
-    useEffect(() => {
-        gsap.from(ref.current, {
-            y: -20, opacity: 0,
-            duration: 0.6, ease: 'power3.out'
+    useLayoutEffect(() => {
+        if (!ref.current) return;
+        gsap.killTweensOf(ref.current);
+        gsap.set(ref.current, { autoAlpha: 1, y: 0 });
+        const tween = gsap.fromTo(ref.current, {
+            y: -10,
+            autoAlpha: 0.001,
+        }, {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.5,
+            ease: 'power2.out',
+            clearProps: 'opacity,visibility,transform',
         });
+        return () => {
+            tween.kill();
+        };
     }, []);
 
     return (
-        <div ref={ref} style={styles.header} className="glass">
+        <div ref={ref} style={styles.header}>
             <div>
                 <h1 ref={titleRef} style={styles.title}>{title}</h1>
                 <p style={styles.date}>
@@ -64,6 +89,16 @@ export default function Header() {
                     <Bell size={17} color="var(--text-muted)" />
                     <div style={styles.badge}>3</div>
                 </div>
+                <button
+                    type="button"
+                    style={styles.iconBtn}
+                    onClick={() => setTheme((prev) => prev === 'dark' ? 'light' : 'dark')}
+                    title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+                >
+                    {theme === 'dark'
+                        ? <Sun size={17} color="var(--warning)" />
+                        : <Moon size={17} color="var(--primary)" />}
+                </button>
                 <div style={styles.iconBtn}>
                     <Sparkles size={17} color="var(--primary)" />
                 </div>
@@ -89,8 +124,12 @@ const styles: Record<string, React.CSSProperties> = {
         padding: '0 32px',
         position: 'sticky',
         top: 0,
-        zIndex: 50,
+        zIndex: 220,
         borderRadius: 0,
+        background: 'var(--glass-bg-card)',
+        borderBottom: '1px solid var(--glass-border)',
+        backdropFilter: 'blur(12px) saturate(150%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(150%)',
     },
     title: {
         fontSize: '19px',
@@ -112,7 +151,7 @@ const styles: Record<string, React.CSSProperties> = {
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        background: 'rgba(255,255,255,0.04)',
+        background: 'var(--base-200)',
         border: '1px solid var(--glass-border)',
         borderRadius: '10px',
         padding: '7px 14px',
@@ -129,13 +168,15 @@ const styles: Record<string, React.CSSProperties> = {
     iconBtn: {
         width: '36px', height: '36px',
         borderRadius: '10px',
-        background: 'rgba(255,255,255,0.04)',
+        background: 'var(--base-200)',
         border: '1px solid var(--glass-border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         position: 'relative' as const,
+        appearance: 'none',
+        outline: 'none',
     },
     badge: {
         position: 'absolute' as const,

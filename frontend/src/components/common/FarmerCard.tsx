@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { MapPin, Phone, Mail, Calendar, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, Mail, Calendar, ArrowRight, Pencil } from 'lucide-react';
 import type { Farmer } from '../../types';
 import { formatDate } from '../../utils/formatCurrency';
 
@@ -11,11 +11,12 @@ gsap.registerPlugin(ScrollTrigger);
 interface FarmerCardProps {
     farmer: Farmer;
     index: number;
+    onEditProfilePic?: (farmer: Farmer) => void;
 }
 
 const API_BASE = 'http://localhost:3001';
 
-export default function FarmerCard({ farmer, index }: FarmerCardProps) {
+export default function FarmerCard({ farmer, index, onEditProfilePic }: FarmerCardProps) {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const innerRef = useRef<HTMLDivElement>(null);
     const [, setFlipped] = useState(false);
@@ -51,9 +52,13 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
         });
     };
 
-    const profilePic = farmer.ProfilePicUrl
-    ? `${API_BASE}${farmer.ProfilePicUrl}`
-    : `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.FarmerName)}&background=1e1533&color=8b7cf6&size=200&font-size=0.45&bold=true&format=svg`;
+    const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.FarmerName)}&background=1e1533&color=8b7cf6&size=200&font-size=0.45&bold=true&format=svg`;
+    const hasValidProfilePic = typeof farmer.ProfilePicUrl === 'string'
+        && farmer.ProfilePicUrl.trim().length > 0
+        && farmer.ProfilePicUrl.trim().toLowerCase() !== 'null';
+    const profilePic = hasValidProfilePic
+        ? `${API_BASE}${farmer.ProfilePicUrl}`
+        : defaultAvatar;
     return (
         <div
             ref={wrapperRef}
@@ -78,7 +83,17 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
 
                     <div style={styles.profileWrap}>
                         <div style={{ position: 'relative' }}>
-                            <img src={profilePic} alt={farmer.FarmerName} style={styles.avatar} />
+                            <img
+                                src={profilePic}
+                                alt={farmer.FarmerName}
+                                style={styles.avatar}
+                                onError={(e) => {
+                                    const img = e.currentTarget;
+                                    if (img.src !== defaultAvatar) {
+                                        img.src = defaultAvatar;
+                                    }
+                                }}
+                            />
                             <div style={{
                                 ...styles.dot,
                                 background: farmer.Age < 35 ? 'var(--secondary)' : 'var(--warning)',
@@ -111,9 +126,32 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
 
                 {/* ===== BACK ===== */}
                 <div style={styles.back}>
+                    {onEditProfilePic && (
+                        <button
+                            type="button"
+                            style={styles.editPicBtn}
+                            aria-label="Edit profile picture"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEditProfilePic(farmer);
+                            }}
+                        >
+                            <Pencil size={11} />
+                        </button>
+                    )}
                     <div style={styles.backInner}>
                         <div style={styles.backHead}>
-                            <img src={profilePic} alt={farmer.FarmerName} style={styles.backAvatar} />
+                            <img
+                                src={profilePic}
+                                alt={farmer.FarmerName}
+                                style={styles.backAvatar}
+                                onError={(e) => {
+                                    const img = e.currentTarget;
+                                    if (img.src !== defaultAvatar) {
+                                        img.src = defaultAvatar;
+                                    }
+                                }}
+                            />
                             <div>
                                 <h3 style={styles.backName}>{farmer.FarmerName}</h3>
                                 <span style={styles.backId}>{farmer.FarmerId}</span>
@@ -168,6 +206,22 @@ const styles: Record<string, React.CSSProperties> = {
         height: '3px',
         background: 'linear-gradient(90deg, var(--primary), var(--accent))',
     },
+    editPicBtn: {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        width: '24px',
+        height: '24px',
+        borderRadius: '8px',
+        border: '1px solid var(--glass-border)',
+        background: 'var(--glass-bg)',
+        color: 'var(--text-muted)',
+        cursor: 'pointer',
+        zIndex: 3,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     profileWrap: {
         position: 'relative',
         marginBottom: '12px',
@@ -190,7 +244,7 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'absolute',
     top: '-8px',
     right: '-24px',
-    background: '#0d1117',
+    background: 'var(--base-100)',
     color: 'var(--primary)',
     fontSize: '10px',
     fontWeight: 700,
@@ -243,12 +297,12 @@ const styles: Record<string, React.CSSProperties> = {
         position: 'absolute',
         width: '100%', height: '100%',
         backfaceVisibility: 'hidden',
-        background: 'rgba(13, 17, 23, 0.85)',
+        background: 'var(--glass-bg-card)',
         backdropFilter: 'blur(20px) saturate(180%)',
         borderRadius: '16px',
         transform: 'rotateY(180deg)',
         padding: '24px',
-        border: '1px solid rgba(139, 124, 246, 0.1)',
+        border: '1px solid var(--glass-border)',
     },
     backInner: {
         height: '100%',

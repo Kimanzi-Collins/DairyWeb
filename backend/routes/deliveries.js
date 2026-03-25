@@ -5,8 +5,23 @@ const { getConnection, sql } = require('../db');
 // GET all deliveries (with joined details)
 router.get('/', async (req, res) => {
     try {
+        const { factoryId, farmerId } = req.query;
         const pool = await getConnection();
-        const result = await pool.request().query(`
+        const request = pool.request();
+
+        const filters = [];
+        if (factoryId) {
+            request.input('factoryId', sql.VarChar, String(factoryId));
+            filters.push('d.FactoryId = @factoryId');
+        }
+        if (farmerId) {
+            request.input('farmerId', sql.VarChar, String(farmerId));
+            filters.push('d.FarmerId = @farmerId');
+        }
+
+        const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+
+        const result = await request.query(`
             SELECT 
                 d.DeliveryId, d.BatchRef,
                 d.FarmerId, f.FarmerName,
@@ -21,6 +36,7 @@ router.get('/', async (req, res) => {
             INNER JOIN Farmers f ON d.FarmerId = f.FarmerId
             INNER JOIN MilkQuality mq ON d.QualityId = mq.QualityId
             INNER JOIN Factories fa ON d.FactoryId = fa.FactoryId
+            ${whereClause}
             ORDER BY d.DeliveryIdNum DESC
         `);
         res.json(result.recordset);

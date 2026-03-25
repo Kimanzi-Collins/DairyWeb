@@ -5,8 +5,23 @@ const { getConnection, sql } = require('../db');
 // GET all sales (with joined details)
 router.get('/', async (req, res) => {
     try {
+        const { agentId, farmerId } = req.query;
         const pool = await getConnection();
-        const result = await pool.request().query(`
+        const request = pool.request();
+
+        const filters = [];
+        if (agentId) {
+            request.input('agentId', sql.VarChar, String(agentId));
+            filters.push('s.AgentId = @agentId');
+        }
+        if (farmerId) {
+            request.input('farmerId', sql.VarChar, String(farmerId));
+            filters.push('s.FarmerId = @farmerId');
+        }
+
+        const whereClause = filters.length ? `WHERE ${filters.join(' AND ')}` : '';
+
+        const result = await request.query(`
             SELECT 
                 s.SaleId,
                 FORMAT(s.SaleDate, 'yyyy-MM-dd') AS SaleDate,
@@ -17,6 +32,7 @@ router.get('/', async (req, res) => {
             FROM Sales s
             INNER JOIN Agents a ON s.AgentId = a.AgentId
             INNER JOIN Farmers f ON s.FarmerId = f.FarmerId
+            ${whereClause}
             ORDER BY s.SaleIdNum DESC
         `);
         res.json(result.recordset);
