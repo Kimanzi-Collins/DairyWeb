@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { FileText, Droplet, DollarSign, TrendingUp, Search, Plus, Edit3, Trash2 } from 'lucide-react';
+import { FileText, Droplet, DollarSign, TrendingUp, Search, Plus, Edit3, Trash2, TruckElectric, BottleWine } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
 import DeliveryForm from '../components/forms/DeliveryForm';
 import '../styles/Transactions.css';
@@ -62,7 +62,7 @@ const Deliveries = () => {
       <div className="tx-page-header"><h1 className="page-title">Deliveries Management</h1><p className="page-date">{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}</p></div>
 
       <div className="tx-stats">
-        <StatCard icon={FileText} title="TOTAL DELIVERIES" value={totalDeliveries} subtitle="records" color="#3b82f6" />
+        <StatCard icon={TruckElectric} title="TOTAL DELIVERIES" value={totalDeliveries} subtitle="records" color="#3b82f6" />
         <StatCard icon={Droplet} title="TOTAL LITRES" value={`${totalLitres.toLocaleString('en-KE', { minimumFractionDigits: 2 })} L`} subtitle="milk received" color="#10b981" />
         <StatCard icon={DollarSign} title="TOTAL AMOUNT" value={fmt(totalAmount)} subtitle="paid out" color="#8b5cf6" />
         <StatCard icon={TrendingUp} title="AVG / DELIVERY" value={`${avgLitres.toFixed(2)} L`} subtitle="per delivery" color="#f59e0b" />
