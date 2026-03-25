@@ -52,9 +52,8 @@ export default function FarmerCard({ farmer, index }: FarmerCardProps) {
     };
 
     const profilePic = farmer.ProfilePicUrl
-        ? `${API_BASE}${farmer.ProfilePicUrl}`
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.FarmerName)}&background=8b7cf6&color=fff&size=200&font-size=0.4&bold=true`;
-
+    ? `${API_BASE}${farmer.ProfilePicUrl}`
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.FarmerName)}&background=1e1533&color=8b7cf6&size=200&font-size=0.45&bold=true&format=svg`;
     return (
         <div
             ref={wrapperRef}
@@ -186,17 +185,19 @@ const styles: Record<string, React.CSSProperties> = {
         border: '2px solid var(--base-200)',
     },
     idBadge: {
-        position: 'absolute',
-        top: '-4px', right: '-20px',
-        background: 'var(--base-100)',
-        color: 'var(--primary)',
-        fontSize: '10px',
-        fontWeight: 700,
-        padding: '2px 8px',
-        borderRadius: '6px',
-        border: '1px solid rgba(139, 124, 246, 0.2)',
-        letterSpacing: '0.3px',
-    },
+    position: 'absolute',
+    top: '-8px',
+    right: '-24px',
+    background: '#0d1117',
+    color: 'var(--primary)',
+    fontSize: '10px',
+    fontWeight: 700,
+    padding: '3px 8px',
+    borderRadius: '6px',
+    border: '1px solid rgba(139, 124, 246, 0.25)',
+    letterSpacing: '0.3px',
+    zIndex: 2,
+},
     name: {
         fontSize: '15px',
         fontWeight: 700,

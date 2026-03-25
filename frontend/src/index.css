@@ -140,3 +140,26 @@ body {
     transform: scale(1.05);
     box-shadow: 0 8px 24px rgba(139, 124, 246, 0.3);
 }
+/* Dark themed select dropdowns */
+select option {
+    background: #161b22;
+    color: #e6edf3;
+    padding: 8px;
+}
+
+select option:hover,
+select option:checked {
+    background: rgba(139, 124, 246, 0.2);
+    color: #e6edf3;
+}
+
+/* Dark themed date picker */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+    cursor: pointer;
+}
+
+/* Remove default select styling on Firefox */
+select {
+    -moz-appearance: none;
+}
