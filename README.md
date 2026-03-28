@@ -425,6 +425,16 @@ DATABASE: DairySphereSociety
 
 ---
 
+## License
+
+This project is licensed under a proprietary **All Rights Reserved** license.
+
+- Copyright (c) 2026 Kimanzi-Collins.
+- Copying, redistribution, or reuse of this codebase is **not permitted** without prior written permission from the owner.
+- See the full legal terms in the `LICENSE` file.
+
+---
+
 ## Sponsor
 
 Support this project under **Kimanzi-Collins**:
